@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="../../dist/app.bundle.css">
+    <link rel="stylesheet" href="../../static/css/main.css">
+    <link rel="stylesheet" href="../../static/css/form.css">
+    <title>BLX.PETROL</title>
+</head>
+<body>
+<div id="app">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12" v-if="getSession.userDetails">
+                <frame-controls></frame-controls>
+            </div>
+            <div class="col-12" :class="{'pt-3': getSession.userDetails}">
+                <router-view></router-view>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../../dist/bundle.js"></script>
+</body>
+</html>

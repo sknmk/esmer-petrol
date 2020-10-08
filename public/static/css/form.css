@@ -1,0 +1,153 @@
+/*
+
+.form-control {
+    border: none;
+    background: #eaeaea;
+    border-radius: .25rem
+}
+
+.form-control:focus,
+.form-control:active {
+    background: #eaeaea;
+    outline: none;
+    box-shadow: none;
+}
+*/
+
+.input-group {
+    /*box-shadow: 0 1px 3px rgba(50, 50, 93, .15), 0 1px 0 rgba(0, 0, 0, .02);*/
+    background-color: #f8f9fa;
+    color: #8898aa;
+    transition: all .15s ease;
+    border: 1px solid #eaeaea;
+    border-radius: 5px;
+}
+
+.input-group:focus-within {
+    /*box-shadow: 0 4px 6px rgba(50, 50, 93, .11), 0 1px 3px rgba(0, 0, 0, .08);*/
+    border-color: rgba(50, 151, 211, .25);
+}
+
+.form-control {
+    height: 40px;
+}
+
+.form-control-sm {
+    height: calc(1.5em + 0.5rem + 2px);
+}
+
+
+.form-control:focus {
+    box-shadow: none;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.form-control, .input-group-text {
+    background-color: rgba(0, 0, 0, 0);
+    border: 0;
+    transition: all .15s ease;
+}
+
+.input-group-text {
+    border: none;
+    font-size: 24px;
+    padding: 0 .5rem;
+}
+
+.input-group-text-sm {
+    font-size: 18px;
+}
+
+label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: .2rem;
+    transition: .1s all ease-in-out;
+    z-index: 5;
+}
+
+.label-empty {
+    position: absolute;
+    top: .5rem;
+    left: 1.8rem;
+    color: #777;
+    font-size: 14px;
+    pointer-events: none;
+}
+
+.label-filled {
+    position: absolute;
+    top: -1.2rem;
+    left: 1rem;
+    font-size: 12px;
+    color: #333
+}
+
+span.text-danger, span.text-muted {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.input-group.has-error {
+    box-shadow: 0 0 0 2px #dc3545;
+    border-radius: .2rem;
+}
+
+.input-group.has-error .form-control,
+.input-group.has-error .input-group-text {
+    color: #dc3545 !important;
+}
+
+.btn {
+    font-weight: 600;
+    border-radius: 5px;
+}
+
+.multiselect{
+    /*box-shadow: 0 1px 3px rgba(50, 50, 93, .15), 0 1px 0 rgba(0, 0, 0, .02);*/
+    border: 1px solid #eaeaea;
+}
+
+.multiselect, .multiselect__tags {
+    height: 38px;
+    border: none;
+    background-color: #f8f9fa;
+    color: #8898aa;
+    transition: all .15s ease;
+    border-radius: 5px;
+}
+
+.multiselect__input {
+    background-color: #f8f9fa;
+    font-size: 14px;
+    font-style: normal;
+}
+
+.multiselect__input, .multiselect__single {
+    background: none;
+    margin-top: 3px
+}
+
+.mx-datepicker {
+    width: 100%;
+}
+
+.dropdown-menu {
+    top: .5rem !important;
+    box-shadow: 0 0 10px 0 rgba(183, 192, 206, 0.6);
+    border: none;
+}
+
+.form-dropdown .dropdown-item {
+    width: 300px;
+}
+
+.form-dropdown .dropdown-item:hover, .form-dropdown .dropdown-item:active {
+    background: inherit;
+    color:inherit
+}
+
+.list-group-item {
+    padding: .75rem .25rem;
+    white-space: normal;
+}
