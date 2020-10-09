@@ -1,69 +1,36 @@
 <template>
-  <b-container
-    fluid="true"
-    class="px-0 m-0 frame-menu pr-0 bg-white"
-  >
+  <b-container fluid="true" class="px-0 m-0 frame-menu pr-0 bg-white" >
     <b-row class="mx-0">
-      <b-col
-        md="2"
-        class="align-self-center bg-primary text-white py-4"
-      >
+      <b-col md="2" class="align-self-center bg-primary text-white py-4" >
         <i class="ri-menu-2-fill" />
         <span class="app-name">BLX.PETROL</span>
       </b-col>
-      <b-col
-        xl="4"
-        md="5"
-        class="align-self-center bg-white py-2"
-      />
-      <b-col
-        xl="6"
-        md="5"
-        class="text-right px-0 pt-2 pb-1 bg-white text-primary align-self-center"
-      >
+      <b-col xl="4" md="5" class="align-self-center bg-white py-2" />
+      <b-col xl="6" md="5" class="text-right px-0 pt-2 pb-1 bg-white text-primary align-self-center" >
         <span>
           <i class="frame-control ri-notification-3-line mr-5" />
           <i class="frame-control ri-mail-line mr-5" />
           <i class="frame-control ri-star-line mr-5" />
-          <i class="frame-control ri-settings-5-line mr-5" />
+          <i class="frame-control ri-settings-5-line mr-5"/>
           <i class="frame-control ri-lock-line mr-5" />
           <span class="dropdown">
-            <i
-              class="frame-control ri-user-3-line dropdown-toggle mr-5"
-              data-toggle="dropdown"
-            />
-            <div
-              class="dropdown-menu dropdown-menu-right"
-              aria-labelledby="dropdownMenuButton"
-            >
+            <i class="frame-control ri-user-3-line dropdown-toggle mr-5" data-toggle="dropdown"/>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton" >
               <span class="dropdown-item-text"> {{ getSession.userDetails.username }}</span>
               <div class="dropdown-divider" />
-              <a
-                class="dropdown-item"
-                href="#"
-                @click="logout"
-              >
+              <a class="dropdown-item" href="#" @click="logout" >
                 <i class="ri-logout-box-line" /> Güvenli Çıkış
               </a>
             </div>
           </span>
         </span>
-        <span
-          class="frame-control mr-3 ml-5 text-dark"
-          @click="minimize()"
-        >
+        <span class="frame-control mr-3 ml-5 text-dark" @click="minimize()">
           <i class="ri-subtract-line " />
         </span>
-        <span
-          class="frame-control mx-3  text-dark"
-          @click="maximize()"
-        >
+        <span class="frame-control mx-3  text-dark" @click="maximize()">
           <i :class="[fullScreen ? 'ri-fullscreen-exit-line' : 'ri-checkbox-blank-line']" />
         </span>
-        <span
-          class="frame-control exit mx-3 text-dark"
-          @click="close()"
-        >
+        <span class="frame-control exit mx-3 text-dark" @click="close()">
           <i class="ri-close-line" />
         </span>
       </b-col>
@@ -73,11 +40,9 @@
 <script type="application/javascript">
 import {mapActions, mapGetters} from "vuex"
 import genericMethods from "../mixins/genericMethods"
-import Multiselect from "vue-multiselect"
-import {ipcRenderer, remote} from "electron"
+import {remote} from "electron"
 
 export default {
-  components: {Multiselect},
   mixins: [genericMethods],
   data() {
     return {
@@ -91,7 +56,6 @@ export default {
     ...mapGetters(["getSession"])
   },
   mounted: function () {
-
     this.currentWindow = remote.getCurrentWindow();
   },
   methods: {
@@ -118,32 +82,6 @@ export default {
       this.destroySession();
       this.close();
     },
-    search(name) {
-      ipcRenderer.removeAllListeners("searchResults")
-      this.searchResults = []
-      if (name.length < 3) {
-        return false
-      }
-      ipcRenderer.send("/quickSearch", {name})
-      new Promise(function (resolve) {
-        ipcRenderer.on('searchResults', (event, result) => {
-          resolve(result);
-        })
-      }).then(result => {
-            this.searchResults = []
-            for (let item of result) {
-              this.searchResults.push({
-                id: item.id,
-                name: item.name + (item.surname && " " + item.surname || "")
-              })
-            }
-          }
-      )
-    },
-    redirect() {
-      this.$router.push("/DetailCustomer/" + this.quickSearch.id)
-      this.quickSearch = []
-    }
   }
 }
 </script>
