@@ -1,6 +1,5 @@
 const { app, BrowserWindow } = require("electron")
 const path = require("path")
-const url = require("url")
 
 function createWindow () {
   const win = new BrowserWindow({
@@ -18,11 +17,11 @@ function createWindow () {
 app.allowRendererProcessReuse = true;
 app.whenReady().then(createWindow)
 
-// app.on('ready', () => {
-//   if (process.env.NODE_ENV !== 'production') {
-//     require('vue-devtools').install()
-//   }
-// })
+app.on('ready', () => {
+  if (process.env.NODE_ENV !== 'production') {
+    require('vue-devtools').install()
+  }
+})
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
@@ -37,3 +36,4 @@ app.on("activate", () => {
 })
 
 // ipcRenderer - ipcMain Process
+require("./lib/dist/controller/Authentication")

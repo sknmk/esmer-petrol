@@ -20,6 +20,7 @@
     "babel-loader": "^8.1.0",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.7.0",
+    "bcrypt": "^5.0.0",
     "css-loader": "^3.5.1",
     "electron": "8.2.3",
     "electron-builder": "^22.7.0",

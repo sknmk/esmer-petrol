@@ -1,18 +1,22 @@
 <template>
-  <b-container fluid="true" class="px-0 m-0 frame-menu pr-0 bg-white" >
+  <b-container fluid="true" class="px-0 m-0 frame-menu pr-0 bg-white w-100">
     <b-row class="mx-0">
       <b-col md="2" class="align-self-center bg-primary text-white py-4" >
-        <i class="ri-menu-2-fill" />
-        <span class="app-name">BLX.PETROL</span>
+        <span class="app-name">ESMERPET</span>
       </b-col>
-      <b-col xl="4" md="5" class="align-self-center bg-white py-2" />
-      <b-col xl="6" md="5" class="text-right px-0 pt-2 pb-1 bg-white text-primary align-self-center" >
+      <b-col md="5" xl="5" class="align-self-center">
+        <b-nav pills>
+          <b-nav-item active>Satış</b-nav-item>
+          <b-nav-item>Müşterisiz İşlem</b-nav-item>
+          <b-nav-item>Müşteri Listesi</b-nav-item>
+          <b-nav-item>Raporlar</b-nav-item>
+        </b-nav>
+      </b-col>
+      <b-col md="5" xl="5" class="text-right px-0 pt-2 pb-1 bg-white text-primary align-self-center">
         <span>
-          <i class="frame-control ri-notification-3-line mr-5" />
-          <i class="frame-control ri-mail-line mr-5" />
-          <i class="frame-control ri-star-line mr-5" />
-          <i class="frame-control ri-settings-5-line mr-5"/>
           <i class="frame-control ri-lock-line mr-5" />
+          <i class="frame-control ri-notification-3-line mr-5" />
+             <i class="frame-control ri-settings-5-line mr-5"/>
           <span class="dropdown">
             <i class="frame-control ri-user-3-line dropdown-toggle mr-5" data-toggle="dropdown"/>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton" >

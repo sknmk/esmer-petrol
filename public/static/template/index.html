@@ -12,10 +12,10 @@
 <div id="app">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-12" v-if="getSession.userDetails">
+            <div class="col-12 px-0" v-if="getSession.userDetails">
                 <frame-controls></frame-controls>
             </div>
-            <div class="col-12" :class="{'pt-3': getSession.userDetails}">
+            <div class="col-12" :class="{'pt-5': getSession.userDetails}">
                 <router-view></router-view>
             </div>
         </div>

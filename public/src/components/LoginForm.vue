@@ -48,7 +48,7 @@
         </b-row>
       </b-col>
     </b-row>
-    <b-alert v-if="exception.general" show variant="danger" class=" shadow rounded mt-3" >
+    <b-alert v-if="exception.general" show variant="danger" class="shadow rounded mt-3" >
       <i class="ri-error-warning-line"/> <strong>Hata!</strong> {{ exception.general }}
     </b-alert>
   </b-container>
@@ -73,9 +73,9 @@ export default {
   },
   mounted() {
     this.$refs.usernameInput.focus()
-    // if (this.getSession.userDetails) {
-    //   this.login()
-    // }
+    if (this.getSession.userDetails) {
+      this.login()
+    }
   },
   methods: {
     ...mapActions(["appendSession"]),
@@ -100,7 +100,7 @@ export default {
       this.exception = {}
       this.waitingResponse = false
       this.success = true
-      this.$router.push("/NewCustomer")
+      this.$router.push("/Dashboard")
       remote.getCurrentWindow().maximize()
       remote.getCurrentWindow().setMinimumSize(1200, 600);
     },

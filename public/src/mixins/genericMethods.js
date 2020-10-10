@@ -1,4 +1,9 @@
 const genericMethods = {
+    data() {
+        return {
+            customerList: []
+        }
+    },
     methods: {
         invalidIcon(property, defaultIcon) {
             return !property ? defaultIcon : "ri-error-warning-line text-danger"
