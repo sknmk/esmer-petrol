@@ -1,10 +1,11 @@
 module.exports = {
-    extends: [
-        'plugin:vue/essential',
-        'eslint:recommended'
-    ],
-    rules: {},
-    env: {
-        node: true
-    }
+  extends: [
+    'eslint:recommended',
+    'plugin:vue/essential',
+    '@vue/standard'
+  ],
+  parserOptions: { ecmaVersion: 2020 },
+  env: {
+    node: true
+  }
 }

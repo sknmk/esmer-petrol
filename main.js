@@ -37,3 +37,7 @@ app.on("activate", () => {
 
 // ipcRenderer - ipcMain Process
 require("./lib/dist/controller/Authentication")
+require("./lib/dist/controller/Customer")
+require("./lib/dist/controller/CustomerPlate")
+require("./lib/dist/controller/Salesofficer")
+require("./lib/dist/controller/Product")

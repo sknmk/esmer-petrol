@@ -2,7 +2,7 @@
   <b-container fluid="true" class="p-0">
     <b-row>
       <i class="close-app ri-close-line" @click="closeApp()"/>
-      <b-col cols="4" class="text-center align-self-center bg-light" >
+      <b-col cols="4" class="text-center align-self-center bg-light">
         <b-img :src="require('../img/logo-blx.png')" class="img-fluid"/>
       </b-col>
       <b-col cols="8" class="bg-white py-5">
@@ -13,32 +13,42 @@
             </h2>
           </b-col>
           <b-col cols="11" class="mb-3">
-            <label>Kullanıcı Adı</label>
-            <b-input-group class="input-group" :class="invalidField(exception.username)">
-              <b-form-input ref="usernameInput" v-model="user.username" type="text" />
-              <b-input-group-append is-text>
-                <i :class="invalidIcon(exception.username, 'ri-user-3-line')"/>
-              </b-input-group-append>
+            <label>Şube</label>
+            <b-input-group class="input-group">
+              <multiselect
+                  v-model="branch.id"
+                  placeholder="Seçiniz"
+                  selectLabel="Seç"
+                  deselectLabel="Sil"
+                  selectedLabel="Seçildi"
+                  track-by="id"
+                  label="name"
+                  :options="authenticators"
+                  :searchable="false">
+                <span slot="noOptions">Yazmaya devam edin.</span>
+                <span slot="noResult">Sonuç bulunamadı.</span>
+              </multiselect>
             </b-input-group>
-            <span v-if="exception.username" class="text-danger">{{ exception.username }}</span>
+            <span v-if="errors.branch" class="text-danger">{{ errors.branch }}</span>
           </b-col>
-          <b-col cols="11" class="mb-4" >
+          <b-col cols="11" class="mb-4">
             <label>Şifre</label>
-            <b-input-group :class="invalidField(exception.password)">
-              <b-form-input v-model="user.password" type="password" @keyup.enter="authenticate"/>
+            <b-input-group :class="invalidField(errors.password)">
+              <b-form-input ref="passwordInput" v-model="branch.password" type="password" @keyup.enter="authenticate"/>
               <b-input-group-append is-text>
-                <i :class="invalidIcon(exception.password, 'ri-lock-line')"/>
+                <i :class="invalidIcon(errors.password, 'ri-lock-line')"/>
               </b-input-group-append>
             </b-input-group>
-            <span v-if="exception.password" class="text-danger">{{ exception.password }}</span>
+            <span v-if="errors.password" class="text-danger">{{ errors.password }}</span>
           </b-col>
           <b-col cols="11" class="text-right">
-            <b-button variant="outline-dark" :class="{'disabled': !user.username || !user.password || waitingResponse || success}"
-                :disabled="!user.username || !user.password || waitingResponse || success"
-                @click="authenticate">
-              <span v-if="!waitingResponse && !Object.keys(exception).length && !success">Giriş</span>
-              <span v-if="!waitingResponse && Object.keys(exception).length">Yeniden Dene</span>
-              <div v-if="waitingResponse">
+            <b-button variant="outline-dark"
+                      :class="{'disabled': !branch.id || !branch.password || loading || success}"
+                      :disabled="!branch.id || !branch.password || loading || success"
+                      @click="authenticate">
+              <span v-if="!loading && !Object.keys(errors).length && !success">Giriş</span>
+              <span v-if="!loading && Object.keys(errors).length">Yeniden Dene</span>
+              <div v-if="loading">
                 <b-spinner variant="primary"/>
                 Doğrulanıyor
               </div>
@@ -48,63 +58,79 @@
         </b-row>
       </b-col>
     </b-row>
-    <b-alert v-if="exception.general" show variant="danger" class="shadow rounded mt-3" >
-      <i class="ri-error-warning-line"/> <strong>Hata!</strong> {{ exception.general }}
+    <b-alert v-if="errors.general" show variant="danger" class="shadow rounded mt-3">
+      <i class="ri-error-warning-line"/> <strong>Hata!</strong> {{ errors.general }}
     </b-alert>
   </b-container>
 </template>
 <script>
-import {ipcRenderer, remote} from "electron"
-import {mapGetters, mapActions} from "vuex"
-import genericMethods from "../mixins/genericMethods"
+import { ipcRenderer, remote } from 'electron'
+import { mapActions, mapGetters } from 'vuex'
+import genericMethods from '../mixins/genericMethods'
+import Multiselect from 'vue-multiselect'
+import _ from 'lodash'
 
 export default {
   mixins: [genericMethods],
-  data() {
+  components: { Multiselect },
+  data () {
     return {
-      user: {},
-      exception: {},
-      success: false,
-      waitingResponse: false
+      authenticators: [],
+      branch: {}
     }
   },
   computed: {
-    ...mapGetters(["getSession"])
+    ...mapGetters(['getSession'])
   },
-  mounted() {
-    this.$refs.usernameInput.focus()
-    if (this.getSession.userDetails) {
+  mounted () {
+    this.$refs.passwordInput.focus()
+    if (this.getSession.branchDetails) {
       this.login()
+    } else {
+      this.getAuthenticators()
     }
   },
   methods: {
-    ...mapActions(["appendSession"]),
-    authenticate() {
-      let result = ipcRenderer.sendSync("/auth", this.user)
-      this.waitingResponse = true
-      if (!result.status) {
-        setTimeout(() => {
-          this.exception = result.exception
-          this.waitingResponse = false
-        }, 1000)
-        return false
-      } else {
-        setTimeout(() => {
-          this.appendSession({userDetails: result.userDetails[0]})
-          this.login()
-        }, 1000)
-        return false
+    ...mapActions(['appendSession']),
+    getAuthenticators () {
+      const request = ipcRenderer.sendSync('/auth/list', this.branch)
+      for (const authenticator of request.result) {
+        this.authenticators.push({
+          id: authenticator.id,
+          name: authenticator.name
+        })
       }
+      this.branch.id = _.head(this.authenticators)
     },
-    login() {
-      this.exception = {}
-      this.waitingResponse = false
+    authenticate () {
+      this.loading = true
+      ipcRenderer.send('/auth', this.branch)
+      new Promise(function (resolve) {
+        ipcRenderer.on('authResult', (event, result) => {
+          resolve(result)
+        })
+      }).then(result => {
+        if (!result.status) {
+          this.errors = result.errors
+          this.loading = false
+          this.loading = false
+          return false
+        } else {
+          this.appendSession({ branchDetails: _.head(result.branchDetails) })
+          this.login()
+          return false
+        }
+      })
+    },
+    login () {
+      this.errors = {}
+      this.loading = false
       this.success = true
-      this.$router.push("/Dashboard")
+      this.$router.push('/Dashboard')
       remote.getCurrentWindow().maximize()
-      remote.getCurrentWindow().setMinimumSize(1200, 600);
+      remote.getCurrentWindow().setMinimumSize(1200, 600)
     },
-    closeApp() {
+    closeApp () {
       remote.getCurrentWindow().close()
     }
   }

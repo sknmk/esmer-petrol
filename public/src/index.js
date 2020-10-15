@@ -13,6 +13,7 @@ import 'vue-multiselect/dist/vue-multiselect.min.css'
 import 'typeface-inter'
 import FrameControls from './components/FrameControls.vue'
 
+
 Vue.use(VueRouter)
 Vue.use(Vuex)
 Vue.use(BootstrapVue)
