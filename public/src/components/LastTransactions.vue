@@ -1,0 +1,71 @@
+<template>
+  <b-container fluid>
+    <b-row v-if="!_.isEmpty(transactions)">
+      <b-col cols="12">
+        <h5 class="text-transparent mb-3">Son İşlemler</h5>
+      </b-col>
+      <b-col cols="12" class="mb-4" v-for="transaction of transactions" :key="transaction.id">
+        <b-card>
+          <h6>
+            <b-icon-building></b-icon-building>
+            {{ transaction.customerName }}
+          </h6>
+          <b-icon-truck></b-icon-truck>
+          {{ transaction.plate }}
+          <br/>
+          <b-icon-person></b-icon-person>
+          {{ transaction.driverName }}
+          <hr/>
+          <p class="text-right">₺{{ transaction.totalPrice }}</p>
+        </b-card>
+      </b-col>
+    </b-row>
+    <b-row v-else>
+      <b-col cols="12 mt-4">
+        <b-card class="mt-3">
+          <h6 class="text-transparent mb-0">
+            <b-icon-exclamation-octagon class="mr-1"></b-icon-exclamation-octagon>
+            Kayıtlı işlem bulunamadı.
+          </h6>
+        </b-card>
+      </b-col>
+    </b-row>
+  </b-container>
+</template>
+<script>
+import { ipcRenderer } from 'electron'
+import { mapGetters } from 'vuex'
+import _ from 'lodash'
+
+export default {
+  data () {
+    return {
+      transactions: []
+    }
+  },
+  computed: {
+    ...mapGetters(['getSession']),
+    _ () {
+      return _
+    },
+    branchId: function () {
+      return this.getSession.branchDetails.id
+    }
+  },
+  mounted () {
+    this.get()
+  },
+  methods: {
+    get () {
+      ipcRenderer.send('/oncredit/list', { branchId: this.branchId })
+      new Promise(function (resolve) {
+        ipcRenderer.on('oncreditList', (event, response) => {
+          resolve(response)
+        })
+      }).then(response => {
+        this.transactions = response
+      })
+    }
+  }
+}
+</script>

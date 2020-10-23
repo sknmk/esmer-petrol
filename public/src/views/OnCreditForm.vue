@@ -99,13 +99,13 @@
                     </b-td>
                   </b-tr>
                 </b-tbody>
-                <b-tfoot v-if="totalAmount > 0">
+                <b-tfoot v-if="totalPrice > 0">
                   <b-tr>
                     <b-td colspan="3">
-                      Yalnız {{ this.priceToString(totalAmount.toFixed(2))}}
+                      Yalnız {{ this.priceToString(totalPrice.toFixed(2)) }}
                     </b-td>
                     <b-td colspan="2" class="text-right">
-                      Toplam: ₺{{ totalAmount }}
+                      Toplam: ₺{{ totalPrice }}
                     </b-td>
                   </b-tr>
                 </b-tfoot>
@@ -124,6 +124,7 @@
                   track-by="id"
                   label="name"
                   tagPlaceholder="Şoförü tanıtmak için enter."
+                  :disabled="!customer.id"
                   :taggable="true"
                   :options="options.drivers"
                   @search-change="findDriver"
@@ -146,7 +147,6 @@
           </b-form-row>
           <b-form-row class="mt-4">
             <b-col>
-              <label>&nbsp;</label>
               <b-form-checkbox
                   v-model="sms"
                   id="sms"
@@ -162,56 +162,38 @@
                 <b-icon-x></b-icon-x>
                 İptal
               </b-button>
-              <b-button variant="outline-primary" @click="save">
-                <b-icon-printer></b-icon-printer>
-                Yazdır
+              <b-button :variant="!success ? 'outline-primary' : 'success'" @click="save"
+                        :disabled="!customer.id || !plate.id || _.isEmpty(soldProducts) || !driver.id || loading || success">
+                <span v-if="loading"><b-icon-arrow-clockwise
+                    animation="spin"></b-icon-arrow-clockwise> Bekleyiniz..</span>
+                <span v-if="!loading && _.isEmpty(errors) && !success"><b-icon-printer></b-icon-printer> Yazdır</span>
+                <span v-if="!_.isEmpty(errors)"></span>
+                <span v-if="success"><b-icon-check2-circle></b-icon-check2-circle> Yazdırıldı</span>
               </b-button>
             </b-col>
           </b-form-row>
         </b-card>
       </b-col>
       <b-col cols="2">
-        <h5 class="text-transparent mb-3">Son İşlemler</h5>
-        <b-row>
-          <b-col cols="12" class="mb-4">
-            <b-card>
-              <h6>
-                <b-icon-building></b-icon-building>
-                Ayvaz Lojistik
-              </h6>
-              <b-icon-truck></b-icon-truck>
-              61VZ1990
-              <hr/>
-              200Lt. / ₺1440.50
-            </b-card>
-          </b-col>
-          <b-col cols="12">
-            <b-card>
-              <h6>
-                <b-icon-building></b-icon-building>
-                Ayvaz Lojistik
-              </h6>
-              <b-icon-truck></b-icon-truck>
-              52FA9912
-              <hr/>
-              155Lt. / ₺1140
-            </b-card>
-          </b-col>
-        </b-row>
+        <last-transactions></last-transactions>
       </b-col>
     </b-row>
   </b-container>
 </template>
 <script>
+import { ipcRenderer } from 'electron'
 import { mapGetters } from 'vuex'
+import _ from 'lodash'
 import Multiselect from 'vue-multiselect'
 import genericMethods from '../mixins/genericMethods'
-import { ipcRenderer } from 'electron'
-import _ from 'lodash'
+import LastTransactions from '../components/LastTransactions.vue'
 
 export default {
   mixins: [genericMethods],
-  components: { Multiselect },
+  components: {
+    Multiselect,
+    LastTransactions
+  },
   data () {
     return {
       customer: [],
@@ -242,13 +224,13 @@ export default {
         return parseFloat(i.price) > 0.1
       })
     },
-    totalAmount: function () {
+    totalPrice: function () {
       return _.sumBy(this.soldProducts, function (p) {
         return parseFloat(p.price)
       })
     },
     branchId: function () {
-      return this.getSession.branchDetails.branchId
+      return this.getSession.branchDetails.id
     },
     companyId: function () {
       return this.getSession.branchDetails.companyId
@@ -290,15 +272,15 @@ export default {
         }
       })
     },
-    findPlate (name) {
-      if (name.length < 3) {
+    findPlate (plate) {
+      if (plate.length < 3) {
         return false
       }
       this.options.plates = []
       ipcRenderer.removeAllListeners('plateList')
       ipcRenderer.send('/plate/list', {
-        name,
-        companyId: this.getSession.branchDetails.companyId
+        plate,
+        customerId: this.customer.id ? this.customer.id : null
       })
       new Promise(function (resolve) {
         ipcRenderer.on('plateList', (event, response) => {
@@ -317,46 +299,78 @@ export default {
       })
     },
     createPlate (plate) {
+      if (this.plateValidation(plate) === false) {
+        return false
+      }
       const tag = {
         id: 'new',
         name: _.toUpper(plate)
       }
       this.plate = tag
       this.options.plates.push(tag)
+    },
+    plateValidation (plate) {
+      if (plate.length < 7 || plate.length > 32) {
+        this.$bvToast.toast('Geçersiz bir plaka girdiniz.', {
+          title: 'Uyarı',
+          toaster: 'b-toaster-top-center',
+          variant: 'danger',
+          solid: true,
+          toastClass: 'mt-6',
+          noCloseButton: true,
+          appendToast: true
+        })
+        return false
+      }
     },
     findDriver (name) {
       if (name.length < 3) {
         return false
       }
-      this.options.plates = []
-      ipcRenderer.removeAllListeners('plateList')
-      ipcRenderer.send('/plate/list', {
+      this.options.drivers = []
+      ipcRenderer.removeAllListeners('driverList')
+      ipcRenderer.send('/driver/list', {
         name,
-        companyId: this.getSession.branchDetails.companyId
+        customerId: this.customer.id
       })
       new Promise(function (resolve) {
-        ipcRenderer.on('plateList', (event, response) => {
+        ipcRenderer.on('driverList', (event, response) => {
           resolve(response)
         })
       }).then(response => {
-        for (const plate of response) {
-          this.options.plates.push({
-            id: plate.id,
-            name: plate.plate,
-            customerId: plate.customerId,
-            customerName: plate.customerName,
-            customerDiscount: plate.customerDiscount
+        for (const driver of response) {
+          this.options.drivers.push({
+            id: driver.id,
+            name: driver.name
           })
         }
       })
     },
-    createDriver (plate) {
+    createDriver (name) {
+      if (this.driverValidation(name) === false) {
+        return false
+      }
       const tag = {
         id: 'new',
-        name: _.toUpper(plate)
+        name: _.toUpper(name)
       }
-      this.plate = tag
-      this.options.plates.push(tag)
+      this.driver = tag
+      this.options.drivers.push(tag)
+    },
+    driverValidation (name) {
+      const namePieces = name.split(' ')
+      if (namePieces[0].length < 3 || name.length < 7 || name.length > 50) {
+        this.$bvToast.toast('Geçersiz bir şoför ismi girdiniz.', {
+          title: 'Uyarı',
+          toaster: 'b-toaster-top-center',
+          variant: 'danger',
+          solid: true,
+          toastClass: 'mt-6',
+          noCloseButton: true,
+          appendToast: true
+        })
+        return false
+      }
     },
     checkCustomer () {
       if (_.isEmpty(this.customer)) {
@@ -405,19 +419,63 @@ export default {
           _.divide(parseFloat(this.options.products[i].price), parseFloat(this.options.products[i].salePrice))
             .toFixed(2)
     },
+    insertDriver () {
+      if (this.driver && this.driver.id === 'new') {
+        const form = {
+          customerId: this.customer.id,
+          driver: this.driver.name
+        }
+        return ipcRenderer.sendSync('/driver/create', form)
+      }
+    },
+    insertPlate () {
+      if (this.plate && this.plate.id === 'new') {
+        const form = {
+          customerId: this.customer.id,
+          plate: this.plate.name
+        }
+        return ipcRenderer.sendSync('/plate/create', form)
+      }
+    },
     save () {
+      this.loading = true
+      const driverId = this.driver.id === 'new' ? this.insertDriver() : this.driver.id
+      const plateId = this.plate.id === 'new' ? this.insertPlate() : this.plate.id
       ipcRenderer.send('/oncredit/create', {
         products: this.soldProducts,
         companyId: this.companyId,
         branchId: this.branchId,
-        salesofficerId: this.salesofficerId
+        salesofficerId: this.salesofficerId,
+        customer: this.customer,
+        description: this.description,
+        sms: this.sms,
+        plateId,
+        driverId,
+        totalPrice: this.totalPrice
       })
       new Promise(function (resolve) {
         ipcRenderer.on('oncreditCreate', (event, response) => {
           resolve(response)
         })
       }).then(response => {
+        this.loading = false
+        if (_.isEmpty(response.errors)) {
+          this.errors = response.errors
+          return false
+        }
         this.success = true
+        this.$bvToast.toast('İşlem tamamlandı. ', {
+          title: 'Başarılı',
+          toaster: 'b-toaster-bottom-center',
+          variant: 'success',
+          solid: true,
+          toastClass: 'mt-6',
+          noCloseButton: true,
+          appendToast: true
+        })
+        setTimeout(() => {
+          this.$router.push('/Dashboard')
+        }, 2000)
       })
     }
   }
