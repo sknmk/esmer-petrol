@@ -1,43 +1,22 @@
 <template>
   <b-container fluid="true" class="px-0 m-0 frame-menu pr-0 bg-white w-100">
     <b-row class="mx-0">
-      <b-col md="2" class="align-self-center bg-primary text-white py-4">
-        <span class="app-name">ESMERPET</span>
+      <b-col md="2" class="align-self-center py-1">
+        <img src="../img/logo-blx.png" alt="logo" height="32"/>
       </b-col>
-      <b-col md="5" xl="5" class="align-self-center">
-        <b-nav pills v-if="this.getSession.salesOfficer">
-          <b-nav-item active>Satış</b-nav-item>
-          <b-nav-item>Müşterisiz İşlem</b-nav-item>
-          <b-nav-item>Müşteri Listesi</b-nav-item>
-          <b-nav-item>Raporlar</b-nav-item>
-        </b-nav>
-      </b-col>
-      <b-col md="5" xl="5" class="text-right align-self-center no-drag">
-        <b-button size="lg" variant="light" class="rounded-circle text-primary">
-          <b-icon-bell class="text-primary"></b-icon-bell>
-        </b-button>
-        <b-button size="lg" variant="light" class="rounded-circle text-primary">
-          <b-icon-gear class="text-primary"></b-icon-gear>
-        </b-button>
-        <b-dropdown size="lg" variant="light" right toggle-class="text-decoration-none text-primary rounded-circle mr-5"
-                    no-caret>
-          <template v-slot:button-content>
-            <b-icon-person class="text-primary"></b-icon-person>
-          </template>
-          <b-dropdown-item href="#">{{ getSession.branchDetails.name }}</b-dropdown-item>
-          <b-dropdown-item href="#" @click="logout">
-            <b-icon-box-arrow-left></b-icon-box-arrow-left>
-            Güvenli Çıkış
-          </b-dropdown-item>
-        </b-dropdown>
-        <b-button variant="light" class="rounded-circle" @click="minimize()">
+      <b-col offset-md="5" md="5" class="text-right align-self-center">
+        <span class="mr-5 no-drag pointer no-drag" v-b-popover.hover.left="'Güvenli Çıkış'" @click="logout">
+          <b-icon-person-circle></b-icon-person-circle>
+          {{ getSession.branchDetails.name }}
+        </span>
+        <b-button variant="light" class="rounded-circle no-drag" @click="minimize()">
           <b-icon-dash></b-icon-dash>
         </b-button>
-        <b-button variant="light" class="rounded-circle" @click="maximize()">
+        <b-button variant="light" class="rounded-circle no-drag" @click="maximize()">
           <b-icon-fullscreen v-if="!fullScreen"></b-icon-fullscreen>
-          <b-icon-fullscreen-exit v-else></b-icon-fullscreen-exit>
+          <b-icon-files v-else></b-icon-files>
         </b-button>
-        <b-button variant="light" class="rounded-circle" @click="close()">
+        <b-button variant="light" class="rounded-circle no-drag" @click="close()">
           <b-icon-x></b-icon-x>
         </b-button>
       </b-col>

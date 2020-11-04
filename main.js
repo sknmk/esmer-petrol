@@ -9,11 +9,15 @@ function createWindow () {
     webPreferences: {
       nodeIntegration: true
     },
-    icon: path.join(__dirname, './public/static/img/logo.png')
+    icon: path.join(__dirname, './public/static/img/logo.png'),
+    show: false
   })
-  win.loadFile('./public/static/template/index.html')
-  // win.webContents.openDevTools()
+  win.loadFile('./public/static/template/index.html').then()
+  win.once('ready-to-show', () => {
+    win.show()
+  })
 }
+
 app.allowRendererProcessReuse = true
 app.whenReady().then(createWindow)
 

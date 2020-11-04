@@ -1,11 +1,11 @@
 <template>
   <b-container fluid="true">
-    <b-row class="mt-5">
-      <b-col offset="2" cols="8">
+    <b-row class="mt-2">
+      <b-col cols="9">
         <h5 class="mb-3">Veresiye Fişi</h5>
         <b-card>
           <b-form-row>
-            <b-col cols="6">
+            <b-col cols="6" class="mb-3">
               <label>Müşteri</label>
               <multiselect
                   v-model="customer"
@@ -41,9 +41,29 @@
                 <span slot="noResult">Sonuç bulunamadı.</span>
               </multiselect>
             </b-col>
+            <b-col cols="6">
+              <label>Teslim Alan Şoför</label>
+              <multiselect
+                  v-model="driver"
+                  placeholder="Yazınız"
+                  selectLabel="Seç"
+                  deselectLabel="Sil"
+                  selectedLabel="Seçildi"
+                  track-by="id"
+                  label="name"
+                  tagPlaceholder="Şoförü tanıtmak için enter."
+                  :disabled="!customer.id"
+                  :taggable="true"
+                  :options="options.drivers"
+                  @search-change="findDriver"
+                  @tag="createDriver">
+                <span slot="noOptions">Yazmaya devam edin.</span>
+                <span slot="noResult">Sonuç bulunamadı.</span>
+              </multiselect>
+            </b-col>
           </b-form-row>
           <b-form-row v-if="!_.isEmpty(options.products)">
-            <b-col cols="12 mt-4">
+            <b-col cols="12 mt-3">
               <b-table-simple responsive>
                 <b-thead>
                   <b-tr>
@@ -56,7 +76,7 @@
                 <b-tbody>
                   <b-tr v-for="(product, i) of pricedProducts" :key="i">
                     <b-td class="align-middle">{{ product.name }}</b-td>
-                    <b-td class="align-middle">₺{{ product.salePrice }}</b-td>
+                    <b-td class="align-middle">₺{{ product.forwardSalePrice }}</b-td>
                     <b-td>
                       <b-input-group>
                         <b-input type="number"
@@ -113,40 +133,18 @@
             </b-col>
           </b-form-row>
           <b-form-row>
-            <b-col cols="6">
-              <label>Teslim Alan Şoför</label>
-              <multiselect
-                  v-model="driver"
-                  placeholder="Yazınız"
-                  selectLabel="Seç"
-                  deselectLabel="Sil"
-                  selectedLabel="Seçildi"
-                  track-by="id"
-                  label="name"
-                  tagPlaceholder="Şoförü tanıtmak için enter."
-                  :disabled="!customer.id"
-                  :taggable="true"
-                  :options="options.drivers"
-                  @search-change="findDriver"
-                  @tag="createDriver">
-                <span slot="noOptions">Yazmaya devam edin.</span>
-                <span slot="noResult">Sonuç bulunamadı.</span>
-              </multiselect>
-            </b-col>
-          </b-form-row>
-          <b-form-row class="mt-4">
             <b-col cols="12">
               <label>Açıklama <small class="text-muted">Opsiyonel</small></label>
               <b-input-group>
-                <b-textarea v-model="description" rows="4"></b-textarea>
+                <b-input v-model="description" rows="4"></b-input>
                 <b-input-group-text>
                   <b-icon-pencil></b-icon-pencil>
                 </b-input-group-text>
               </b-input-group>
             </b-col>
           </b-form-row>
-          <b-form-row class="mt-4">
-            <b-col>
+          <b-form-row class="mt-2">
+            <b-col class="align-self-center">
               <b-form-checkbox
                   v-model="sms"
                   id="sms"
@@ -157,7 +155,7 @@
                 <b-icon-chat-left-text></b-icon-chat-left-text>
               </b-form-checkbox>
             </b-col>
-            <b-col class="mt-4 text-right">
+            <b-col class="mt-2 text-right">
               <b-button variant="light" class="text-danger">
                 <b-icon-x></b-icon-x>
                 İptal
@@ -174,7 +172,7 @@
           </b-form-row>
         </b-card>
       </b-col>
-      <b-col cols="2">
+      <b-col cols="3">
         <last-transactions></last-transactions>
       </b-col>
     </b-row>
@@ -216,7 +214,7 @@ export default {
     },
     pricedProducts: function () {
       return this.options.products.filter(function (i) {
-        return i.salePrice
+        return i.forwardSalePrice
       })
     },
     soldProducts: function () {
@@ -397,8 +395,7 @@ export default {
           this.options.products.push({
             id: product.id,
             name: product.name,
-            salePrice: product.salePrice.toFixed(2),
-            forwardSalePrice: product.forwardSalePrice,
+            forwardSalePrice: product.forwardSalePrice.toFixed(2),
             price: null,
             liter: null
           })
@@ -411,12 +408,12 @@ export default {
     },
     fillPrice (i) {
       this.options.products[i].price =
-          _.multiply(parseFloat(this.options.products[i].liter), parseFloat(this.options.products[i].salePrice))
+          _.multiply(parseFloat(this.options.products[i].liter), parseFloat(this.options.products[i].forwardSalePrice))
             .toFixed(2)
     },
     fillLiter (i) {
       this.options.products[i].liter =
-          _.divide(parseFloat(this.options.products[i].price), parseFloat(this.options.products[i].salePrice))
+          _.divide(parseFloat(this.options.products[i].price), parseFloat(this.options.products[i].forwardSalePrice))
             .toFixed(2)
     },
     insertDriver () {
@@ -463,8 +460,31 @@ export default {
           this.errors = response.errors
           return false
         }
+        this.print()
+      })
+    },
+    print () {
+      this.loading = true
+      ipcRenderer.send('/oncredit/print', {
+        products: this.soldProducts,
+        branch: this.getSession.branchDetails.name,
+        salesofficer: this.getSession.salesofficer.name,
+        customer: this.customer.name,
+        description: this.description,
+        totalPrice: this.totalPrice
+      })
+      new Promise(function (resolve) {
+        ipcRenderer.on('oncreditCreate', (event, response) => {
+          resolve(response)
+        })
+      }).then(response => {
+        this.loading = false
+        if (_.isEmpty(response.errors)) {
+          this.errors = response.errors
+          return false
+        }
         this.success = true
-        this.$bvToast.toast('İşlem tamamlandı. ', {
+        this.$bvToast.toast('Yazdırma tamamlandı. ', {
           title: 'Başarılı',
           toaster: 'b-toaster-bottom-center',
           variant: 'success',
@@ -473,9 +493,9 @@ export default {
           noCloseButton: true,
           appendToast: true
         })
-        setTimeout(() => {
-          this.$router.push('/Dashboard')
-        }, 2000)
+        // setTimeout(() => {
+        //   this.$router.push('/Dashboard')
+        // }, 2000)
       })
     }
   }
