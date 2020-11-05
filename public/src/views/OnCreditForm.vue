@@ -436,6 +436,7 @@ export default {
     },
     save () {
       this.loading = true
+      this.errors = []
       const driverId = this.driver.id === 'new' ? this.insertDriver() : this.driver.id
       const plateId = this.plate.id === 'new' ? this.insertPlate() : this.plate.id
       ipcRenderer.send('/oncredit/create', {
@@ -456,14 +457,15 @@ export default {
         })
       }).then(response => {
         this.loading = false
-        if (_.isEmpty(response.errors)) {
+        if (!_.isEmpty(response.errors)) {
           this.errors = response.errors
           return false
+        } else {
+          this.print(response.description)
         }
-        this.print()
       })
     },
-    print () {
+    print (oncreditId) {
       this.loading = true
       ipcRenderer.send('/oncredit/print', {
         products: this.soldProducts,
@@ -471,31 +473,41 @@ export default {
         salesofficer: this.getSession.salesofficer.name,
         customer: this.customer.name,
         description: this.description,
-        totalPrice: this.totalPrice
+        totalPrice: this.totalPrice,
+        totalPriceText: this.priceToString(this.totalPrice.toFixed(2)),
+        oncreditId
       })
       new Promise(function (resolve) {
-        ipcRenderer.on('oncreditCreate', (event, response) => {
+        ipcRenderer.on('printResult', (event, response) => {
           resolve(response)
         })
       }).then(response => {
         this.loading = false
-        if (_.isEmpty(response.errors)) {
-          this.errors = response.errors
-          return false
+        if (!response.status) {
+          this.$bvToast.toast('Yazdırma başarısız oldu. ', {
+            title: 'Hata',
+            toaster: 'b-toaster-bottom-center',
+            variant: 'danger',
+            solid: true,
+            toastClass: 'mt-6',
+            noCloseButton: true,
+            appendToast: true
+          })
+        } else {
+          this.success = true
+          this.$bvToast.toast('İşlem başarılı. ', {
+            title: 'Bilgi',
+            toaster: 'b-toaster-bottom-center',
+            variant: 'success',
+            solid: true,
+            toastClass: 'mt-6',
+            noCloseButton: true,
+            appendToast: true
+          })
+          setTimeout(() => {
+            this.$router.push('/Dashboard')
+          }, 2000)
         }
-        this.success = true
-        this.$bvToast.toast('Yazdırma tamamlandı. ', {
-          title: 'Başarılı',
-          toaster: 'b-toaster-bottom-center',
-          variant: 'success',
-          solid: true,
-          toastClass: 'mt-6',
-          noCloseButton: true,
-          appendToast: true
-        })
-        // setTimeout(() => {
-        //   this.$router.push('/Dashboard')
-        // }, 2000)
       })
     }
   }
