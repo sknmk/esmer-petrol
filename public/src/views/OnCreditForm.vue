@@ -224,7 +224,7 @@ export default {
     },
     totalPrice: function () {
       return _.sumBy(this.soldProducts, function (p) {
-        return parseFloat(p.price)
+        return parseFloat(p.price.toFixed(2))
       })
     },
     branchId: function () {
@@ -467,16 +467,7 @@ export default {
     },
     print (oncreditId) {
       this.loading = true
-      ipcRenderer.send('/oncredit/print', {
-        products: this.soldProducts,
-        branch: this.getSession.branchDetails.name,
-        salesofficer: this.getSession.salesofficer.name,
-        customer: this.customer.name,
-        description: this.description,
-        totalPrice: this.totalPrice,
-        totalPriceText: this.priceToString(this.totalPrice.toFixed(2)),
-        oncreditId
-      })
+      ipcRenderer.send('/oncredit/print', { oncreditId })
       new Promise(function (resolve) {
         ipcRenderer.on('printResult', (event, response) => {
           resolve(response)

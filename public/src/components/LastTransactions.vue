@@ -15,8 +15,11 @@
           <br/>
           <b-icon-person></b-icon-person>
           {{ transaction.driverName }}
+          <br>
+          oncreditId: {{ transaction.oncreditId }}
           <hr/>
           <p class="text-right">₺{{ transaction.totalPrice }}</p>
+          <b-button variant="info" size="sm" @click="printOnCredit(transaction.oncreditId)"><b-icon-printer></b-icon-printer> Yazdır</b-button>
         </b-card>
       </b-col>
     </b-row>
@@ -64,6 +67,39 @@ export default {
         })
       }).then(response => {
         this.transactions = response
+      })
+    },
+    printOnCredit: function (oncreditId) {
+      this.loading = true
+      ipcRenderer.send('/oncredit/print', { oncreditId: oncreditId })
+      new Promise(function (resolve) {
+        ipcRenderer.on('printResult', (event, response) => {
+          resolve(response)
+        })
+      }).then(response => {
+        this.loading = false
+        if (!response.status) {
+          this.$bvToast.toast('Yazdırma başarısız oldu. ', {
+            title: 'Hata',
+            toaster: 'b-toaster-bottom-center',
+            variant: 'danger',
+            solid: true,
+            toastClass: 'mt-6',
+            noCloseButton: true,
+            appendToast: true
+          })
+        } else {
+          this.success = true
+          this.$bvToast.toast('Yazdırıldı. ', {
+            title: 'Bilgi',
+            toaster: 'b-toaster-bottom-center',
+            variant: 'success',
+            solid: true,
+            toastClass: 'mt-6',
+            noCloseButton: true,
+            appendToast: true
+          })
+        }
       })
     }
   }
