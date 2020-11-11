@@ -15,8 +15,6 @@
           <br/>
           <b-icon-person></b-icon-person>
           {{ transaction.driverName }}
-          <br>
-          oncreditId: {{ transaction.oncreditId }}
           <hr/>
           <p class="text-right">₺{{ transaction.totalPrice }}</p>
           <b-button variant="info" size="sm" @click="printOnCredit(transaction.oncreditId)"><b-icon-printer></b-icon-printer> Yazdır</b-button>

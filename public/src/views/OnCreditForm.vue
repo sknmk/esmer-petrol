@@ -62,7 +62,7 @@
               </multiselect>
             </b-col>
           </b-form-row>
-          <b-form-row v-if="!_.isEmpty(options.products)">
+          <b-form-row v-if="!_.isEmpty(options.products) && driver.id && plate.id && customer.id">
             <b-col cols="12 mt-3">
               <b-table-simple responsive>
                 <b-thead>
@@ -165,7 +165,7 @@
                 <span v-if="loading"><b-icon-arrow-clockwise
                     animation="spin"></b-icon-arrow-clockwise> Bekleyiniz..</span>
                 <span v-if="!loading && _.isEmpty(errors) && !success"><b-icon-printer></b-icon-printer> Yazdır</span>
-                <span v-if="!_.isEmpty(errors)"></span>
+                <span v-if="!_.isEmpty(errors)">Hata</span>
                 <span v-if="success"><b-icon-check2-circle></b-icon-check2-circle> Yazdırıldı</span>
               </b-button>
             </b-col>
@@ -224,7 +224,7 @@ export default {
     },
     totalPrice: function () {
       return _.sumBy(this.soldProducts, function (p) {
-        return parseFloat(p.price.toFixed(2))
+        return _.round(p.price, 2)
       })
     },
     branchId: function () {
@@ -461,13 +461,55 @@ export default {
           this.errors = response.errors
           return false
         } else {
-          this.print(response.description)
+          if (isNaN(response.oncreditId)) {
+            console.log('response:')
+            console.log(response)
+            alert('oncreditId alınamadı!')
+            return false
+          }
+          this.printOnCredit(response.oncreditId)
         }
       })
     },
-    print (oncreditId) {
+    // print (oncreditId) {
+    //   this.loading = true
+    //   ipcRenderer.send('/oncredit/print', { oncreditId })
+    //   new Promise(function (resolve) {
+    //     ipcRenderer.on('printResult', (event, response) => {
+    //       resolve(response)
+    //     })
+    //   }).then(response => {
+    //     this.loading = false
+    //     if (!response.status) {
+    //       this.$bvToast.toast('Yazdırma başarısız oldu. ', {
+    //         title: 'Hata',
+    //         toaster: 'b-toaster-bottom-center',
+    //         variant: 'danger',
+    //         solid: true,
+    //         toastClass: 'mt-6',
+    //         noCloseButton: true,
+    //         appendToast: true
+    //       })
+    //     } else {
+    //       this.success = true
+    //       this.$bvToast.toast('İşlem başarılı. ', {
+    //         title: 'Bilgi',
+    //         toaster: 'b-toaster-bottom-center',
+    //         variant: 'success',
+    //         solid: true,
+    //         toastClass: 'mt-6',
+    //         noCloseButton: true,
+    //         appendToast: true
+    //       })
+    //       setTimeout(() => {
+    //         this.$router.push('/Dashboard')
+    //       }, 2000)
+    //     }
+    //   })
+    // },
+    printOnCredit: function (oncreditId) {
       this.loading = true
-      ipcRenderer.send('/oncredit/print', { oncreditId })
+      ipcRenderer.send('/oncredit/print', { oncreditId: oncreditId })
       new Promise(function (resolve) {
         ipcRenderer.on('printResult', (event, response) => {
           resolve(response)
@@ -486,7 +528,7 @@ export default {
           })
         } else {
           this.success = true
-          this.$bvToast.toast('İşlem başarılı. ', {
+          this.$bvToast.toast('Yazdırıldı. ', {
             title: 'Bilgi',
             toaster: 'b-toaster-bottom-center',
             variant: 'success',
@@ -495,9 +537,6 @@ export default {
             noCloseButton: true,
             appendToast: true
           })
-          setTimeout(() => {
-            this.$router.push('/Dashboard')
-          }, 2000)
         }
       })
     }
