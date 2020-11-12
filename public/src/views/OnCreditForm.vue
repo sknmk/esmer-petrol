@@ -83,7 +83,7 @@
                                  step=".01"
                                  min="0.10"
                                  placeholder="Litre giriniz."
-                                 @keyup="fillPrice(i)"
+                                 @input="fillPrice(i)"
                                  v-model="product.liter">
                         </b-input>
                         <b-input-group-text>
@@ -98,7 +98,7 @@
                                  min="0.10"
                                  max="999999"
                                  placeholder="0.00"
-                                 @keyup="fillLiter(i)"
+                                 @input="fillLiter(i)"
                                  v-model="product.price">
                         </b-input>
                       </b-input-group>
@@ -407,14 +407,10 @@ export default {
       })
     },
     fillPrice (i) {
-      this.options.products[i].price =
-          _.multiply(parseFloat(this.options.products[i].liter), parseFloat(this.options.products[i].forwardSalePrice))
-            .toFixed(2)
+      this.options.products[i].price = (parseFloat(this.options.products[i].liter) * parseFloat(this.options.products[i].forwardSalePrice)).toFixed(2)
     },
     fillLiter (i) {
-      this.options.products[i].liter =
-          _.divide(parseFloat(this.options.products[i].price), parseFloat(this.options.products[i].forwardSalePrice))
-            .toFixed(2)
+      this.options.products[i].liter = (parseFloat(this.options.products[i].price) / parseFloat(this.options.products[i].forwardSalePrice)).toFixed(2)
     },
     insertDriver () {
       if (this.driver && this.driver.id === 'new') {

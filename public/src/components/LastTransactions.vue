@@ -1,6 +1,6 @@
 <template>
   <b-container fluid>
-    <b-row v-if="!_.isEmpty(transactions)" class="max-h-650">
+    <b-row v-if="!_.isEmpty(transactions)" class="max-h-750">
       <b-col cols="12">
         <h5 class="text-transparent mb-3">Son İşlemler</h5>
       </b-col>
@@ -104,7 +104,8 @@ export default {
 }
 </script>
 <style>
-.max-h-650 {
-  max-height: 650px;
+.max-h-750 {
+  max-height: 750px;
+  overflow: auto;
 }
 </style>

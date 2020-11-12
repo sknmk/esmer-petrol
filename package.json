@@ -1,7 +1,7 @@
 {
   "name": "esmer-petrol",
   "version": "1.0.0",
-  "description": "esmer petrol için fiş yazma programı",
+  "description": "petrol ofisleri için fiş yazma programı",
   "main": "main.js",
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
