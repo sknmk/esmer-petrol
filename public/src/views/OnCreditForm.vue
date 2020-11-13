@@ -467,42 +467,6 @@ export default {
         }
       })
     },
-    // print (oncreditId) {
-    //   this.loading = true
-    //   ipcRenderer.send('/oncredit/print', { oncreditId })
-    //   new Promise(function (resolve) {
-    //     ipcRenderer.on('printResult', (event, response) => {
-    //       resolve(response)
-    //     })
-    //   }).then(response => {
-    //     this.loading = false
-    //     if (!response.status) {
-    //       this.$bvToast.toast('Yazdırma başarısız oldu. ', {
-    //         title: 'Hata',
-    //         toaster: 'b-toaster-bottom-center',
-    //         variant: 'danger',
-    //         solid: true,
-    //         toastClass: 'mt-6',
-    //         noCloseButton: true,
-    //         appendToast: true
-    //       })
-    //     } else {
-    //       this.success = true
-    //       this.$bvToast.toast('İşlem başarılı. ', {
-    //         title: 'Bilgi',
-    //         toaster: 'b-toaster-bottom-center',
-    //         variant: 'success',
-    //         solid: true,
-    //         toastClass: 'mt-6',
-    //         noCloseButton: true,
-    //         appendToast: true
-    //       })
-    //       setTimeout(() => {
-    //         this.$router.push('/Dashboard')
-    //       }, 2000)
-    //     }
-    //   })
-    // },
     printOnCredit: function (oncreditId) {
       this.loading = true
       ipcRenderer.send('/oncredit/print', { oncreditId: oncreditId })

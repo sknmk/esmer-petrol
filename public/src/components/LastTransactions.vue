@@ -16,8 +16,17 @@
           <b-icon-person></b-icon-person>
           {{ transaction.driverName }}
           <hr/>
-          <p class="text-right">₺{{ transaction.totalPrice }}</p>
-          <b-button variant="info" size="sm" @click="printOnCredit(transaction.oncreditId)"><b-icon-printer></b-icon-printer> Yazdır</b-button>
+          <b-row>
+            <b-col>
+              <b-button variant="outline-secondary" size="sm" @click="printOnCredit(transaction.oncreditId)">
+                <b-icon-printer></b-icon-printer>
+                Yazdır
+              </b-button>
+            </b-col>
+            <b-col class="text-right" align-self="center">
+              ₺{{ transaction.totalPrice }}
+            </b-col>
+          </b-row>
         </b-card>
       </b-col>
     </b-row>

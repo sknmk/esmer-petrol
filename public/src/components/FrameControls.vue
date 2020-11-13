@@ -5,9 +5,13 @@
         <img src="../img/logo-blx.png" alt="logo" height="32"/>
       </b-col>
       <b-col offset-md="5" md="5" class="text-right align-self-center">
-        <span class="mr-5 no-drag pointer no-drag" v-b-popover.hover.left="'Güvenli Çıkış'" @click="logout">
-          <b-icon-person-circle></b-icon-person-circle>
-          {{ getSession.branchDetails.name }}
+        <span class="pointer no-drag" v-b-popover.hover.left="'Güvenli Çıkış'" @click="logout">
+          <b-icon-box-arrow-left></b-icon-box-arrow-left>
+          Güvenli Çıkış
+        </span>
+        <span class="mr-5">
+           <b-icon-dot class="text-muted mx-3"></b-icon-dot>
+           {{ getSession.branchDetails.name }}
         </span>
         <b-button variant="light" class="rounded-circle no-drag" @click="minimize()">
           <b-icon-dash></b-icon-dash>

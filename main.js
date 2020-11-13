@@ -21,12 +21,6 @@ function createWindow () {
 app.allowRendererProcessReuse = true
 app.whenReady().then(createWindow)
 
-app.on('ready', () => {
-  if (process.env.NODE_ENV !== 'production') {
-    require('vue-devtools').install()
-  }
-})
-
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
@@ -40,10 +34,10 @@ app.on('activate', () => {
 })
 
 // ipcRenderer - ipcMain Process
-require('./lib/dist/controller/Authentication')
-require('./lib/dist/controller/Customer')
-require('./lib/dist/controller/CustomerPlate')
-require('./lib/dist/controller/CustomerDriver')
-require('./lib/dist/controller/OnCredit')
-require('./lib/dist/controller/Salesofficer')
-require('./lib/dist/controller/Product')
+require(path.join(__dirname, './lib/dist/controller/Authentication'))
+require(path.join(__dirname, './lib/dist/controller/Customer'))
+require(path.join(__dirname, './lib/dist/controller/CustomerPlate'))
+require(path.join(__dirname, './lib/dist/controller/CustomerDriver'))
+require(path.join(__dirname, './lib/dist/controller/OnCredit'))
+require(path.join(__dirname, './lib/dist/controller/Salesofficer'))
+require(path.join(__dirname, './lib/dist/controller/Product'))
