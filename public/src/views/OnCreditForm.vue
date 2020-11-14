@@ -125,7 +125,7 @@
                       Yalnız {{ this.priceToString(totalPrice.toFixed(2)) }}
                     </b-td>
                     <b-td colspan="2" class="text-right">
-                      Toplam: ₺{{ totalPrice }}
+                      Toplam: ₺{{ totalPrice.toFixed(2) }}
                     </b-td>
                   </b-tr>
                 </b-tfoot>
@@ -156,14 +156,13 @@
               </b-form-checkbox>
             </b-col>
             <b-col class="mt-2 text-right">
-              <b-button variant="light" class="text-danger">
+              <b-button variant="light" class="text-danger" @click="backtoUserSelector()">
                 <b-icon-x></b-icon-x>
                 İptal
               </b-button>
               <b-button :variant="!success ? 'outline-primary' : 'success'" @click="save"
                         :disabled="!customer.id || !plate.id || _.isEmpty(soldProducts) || !driver.id || loading || success">
-                <span v-if="loading"><b-icon-arrow-clockwise
-                    animation="spin"></b-icon-arrow-clockwise> Bekleyiniz..</span>
+                <span v-if="loading"><b-spinner></b-spinner> Bekleyiniz..</span>
                 <span v-if="!loading && _.isEmpty(errors) && !success"><b-icon-printer></b-icon-printer> Yazdır</span>
                 <span v-if="!_.isEmpty(errors)">Hata</span>
                 <span v-if="success"><b-icon-check2-circle></b-icon-check2-circle> Yazdırıldı</span>
@@ -409,12 +408,12 @@ export default {
     fillPrice (i) {
       this.options.products[i].price =
           _.multiply(parseFloat(this.options.products[i].liter), parseFloat(this.options.products[i].forwardSalePrice))
-            .toFixed(2)
+              .toFixed(2)
     },
     fillLiter (i) {
       this.options.products[i].liter =
           _.divide(parseFloat(this.options.products[i].price), parseFloat(this.options.products[i].forwardSalePrice))
-            .toFixed(2)
+              .toFixed(2)
     },
     insertDriver () {
       if (this.driver && this.driver.id === 'new') {
@@ -462,54 +461,19 @@ export default {
           return false
         } else {
           if (isNaN(response.oncreditId)) {
-            console.log('response:')
-            console.log(response)
-            alert('oncreditId alınamadı!')
+            alert('Kritik hata.')
             return false
           }
-          this.printOnCredit(response.oncreditId)
+          this.printOnCredit(response.oncreditId, 3)
+          setTimeout(() => {
+            this.backtoUserSelector()
+          }, 2000)
         }
       })
     },
-    // print (oncreditId) {
-    //   this.loading = true
-    //   ipcRenderer.send('/oncredit/print', { oncreditId })
-    //   new Promise(function (resolve) {
-    //     ipcRenderer.on('printResult', (event, response) => {
-    //       resolve(response)
-    //     })
-    //   }).then(response => {
-    //     this.loading = false
-    //     if (!response.status) {
-    //       this.$bvToast.toast('Yazdırma başarısız oldu. ', {
-    //         title: 'Hata',
-    //         toaster: 'b-toaster-bottom-center',
-    //         variant: 'danger',
-    //         solid: true,
-    //         toastClass: 'mt-6',
-    //         noCloseButton: true,
-    //         appendToast: true
-    //       })
-    //     } else {
-    //       this.success = true
-    //       this.$bvToast.toast('İşlem başarılı. ', {
-    //         title: 'Bilgi',
-    //         toaster: 'b-toaster-bottom-center',
-    //         variant: 'success',
-    //         solid: true,
-    //         toastClass: 'mt-6',
-    //         noCloseButton: true,
-    //         appendToast: true
-    //       })
-    //       setTimeout(() => {
-    //         this.$router.push('/Dashboard')
-    //       }, 2000)
-    //     }
-    //   })
-    // },
     printOnCredit: function (oncreditId) {
       this.loading = true
-      ipcRenderer.send('/oncredit/print', { oncreditId: oncreditId })
+      ipcRenderer.send('/oncredit/print', { oncreditId: oncreditId, copy: false })
       new Promise(function (resolve) {
         ipcRenderer.on('printResult', (event, response) => {
           resolve(response)
@@ -517,9 +481,9 @@ export default {
       }).then(response => {
         this.loading = false
         if (!response.status) {
-          this.$bvToast.toast('Yazdırma başarısız oldu. ', {
+          this.$bvToast.toast(i + '. yazdırma başarısız oldu. ', {
             title: 'Hata',
-            toaster: 'b-toaster-bottom-center',
+            toaster: 'b-toaster-top-center',
             variant: 'danger',
             solid: true,
             toastClass: 'mt-6',
@@ -530,7 +494,7 @@ export default {
           this.success = true
           this.$bvToast.toast('Yazdırıldı. ', {
             title: 'Bilgi',
-            toaster: 'b-toaster-bottom-center',
+            toaster: 'b-toaster-top-center',
             variant: 'success',
             solid: true,
             toastClass: 'mt-6',
@@ -539,6 +503,9 @@ export default {
           })
         }
       })
+    },
+    backtoUserSelector: function () {
+      this.$router.push('/Dashboard')
     }
   }
 }

@@ -18,6 +18,9 @@ const mutations = {
     const key = Object.keys(object)[0]
     state.session = Object.assign({ [key]: object[key] }, state.session)
   },
+  destroySalesofficer (state) {
+    delete state.session.salesofficer
+  },
   destroySession (state) {
     state.session = {}
   }
@@ -29,6 +32,9 @@ const actions = {
   },
   destroySession ({ commit }) {
     commit('destroySession')
+  },
+  destroySalesofficer ({ commit }) {
+    commit('destroySalesofficer')
   }
 }
 

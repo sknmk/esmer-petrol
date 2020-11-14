@@ -69,7 +69,7 @@ export default {
     },
     printOnCredit: function (oncreditId) {
       this.loading = true
-      ipcRenderer.send('/oncredit/print', { oncreditId: oncreditId })
+      ipcRenderer.send('/oncredit/print', { oncreditId: oncreditId, copy: 1 })
       new Promise(function (resolve) {
         ipcRenderer.on('printResult', (event, response) => {
           resolve(response)

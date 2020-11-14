@@ -76,6 +76,7 @@ export default {
   },
   methods: {
     ...mapActions(['appendSession']),
+    ...mapActions(['destroySalesofficer']),
     getSalesofficers () {
       this.loading = true
       ipcRenderer.send('/salesofficer/list', { branchId: this.getSession.branchDetails.id })
@@ -94,6 +95,7 @@ export default {
       })
     },
     select (i) {
+      this.destroySalesofficer()
       this.appendSession({ salesofficer: this.salesofficers[i] })
       this.$router.push('/OnCreditForm')
     }
