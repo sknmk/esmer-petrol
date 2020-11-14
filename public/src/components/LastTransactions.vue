@@ -1,6 +1,6 @@
 <template>
   <b-container fluid>
-    <b-row v-if="!_.isEmpty(transactions)" class="max-h-650">
+    <b-row v-if="!_.isEmpty(transactions)" class="max-h-750">
       <b-col cols="12">
         <h5 class="text-transparent mb-3">Son İşlemler</h5>
       </b-col>
@@ -16,8 +16,17 @@
           <b-icon-person></b-icon-person>
           {{ transaction.driverName }}
           <hr/>
-          <p class="text-right">₺{{ transaction.totalPrice }}</p>
-          <b-button variant="info" size="sm" @click="printOnCredit(transaction.oncreditId)"><b-icon-printer></b-icon-printer> Yazdır</b-button>
+          <b-row>
+            <b-col>
+              <b-button variant="outline-secondary" size="sm" @click="printOnCredit(transaction.oncreditId)">
+                <b-icon-printer></b-icon-printer>
+                Yazdır
+              </b-button>
+            </b-col>
+            <b-col class="text-right" align-self="center">
+              ₺{{ transaction.totalPrice }}
+            </b-col>
+          </b-row>
         </b-card>
       </b-col>
     </b-row>
@@ -104,7 +113,8 @@ export default {
 }
 </script>
 <style>
-.max-h-650 {
-  max-height: 650px;
+.max-h-750 {
+  max-height: 750px;
+  overflow: auto;
 }
 </style>
