@@ -16,6 +16,7 @@
   },
   "author": "Bilexi",
   "license": "ISC",
+  "nodeGypRebuild": true,
   "devDependencies": {
     "@babel/core": "^7.12.0",
     "@babel/plugin-transform-runtime": "^7.12.0",
