@@ -1,10 +1,10 @@
 {
   "name": "blx-petrol-frontdesk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "build": {
-    "productName": "Bilexi Petrol FrontDesk"
+    "productName": "Bilexi Petrol Veresiye Satış"
   },
-  "description": "Oncredit sales organizer for petrol stations.",
+  "description": "Bilexi akaryakıt uygulamasının veresiye satış arayüzü.",
   "main": "./main.js",
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
