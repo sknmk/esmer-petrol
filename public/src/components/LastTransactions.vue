@@ -4,7 +4,7 @@
       <b-col cols="12">
         <h5 class="text-transparent mb-3">Son İşlemler</h5>
       </b-col>
-      <b-col cols="12" class="mb-4" v-for="transaction of transactions" :key="transaction.id">
+      <b-col cols="12" class="mb-4" v-for="(transaction, index) of transactions" :key="transaction.id">
         <b-card>
           <h6>
             <b-icon-building></b-icon-building>
@@ -18,9 +18,11 @@
           <hr/>
           <b-row>
             <b-col>
-              <b-button variant="outline-secondary" size="sm" @click="printOnCredit(transaction.oncreditId)">
-                <b-icon-printer></b-icon-printer>
-                Yazdır
+              <b-button variant="outline-secondary" size="sm" :disabled="ltLoading['lt' +index]"
+                        @click="printOnCredit(transaction.oncreditId, index)">
+                <span v-if="ltLoading['lt' + index]"><b-spinner></b-spinner> Bekleyiniz..</span>
+                <span v-if="!ltLoading['lt' +index]"><b-icon-printer></b-icon-printer> Yazdır</span>
+                <span v-if="ltSuccess['lt' +index] && !ltLoading['lt' +index]"><b-icon-check2-circle></b-icon-check2-circle> Yazdırıldı</span>
               </b-button>
             </b-col>
             <b-col class="text-right" align-self="center">
@@ -50,7 +52,9 @@ import _ from 'lodash'
 export default {
   data () {
     return {
-      transactions: []
+      transactions: [],
+      ltLoading: {},
+      ltSuccess: {}
     }
   },
   computed: {
@@ -76,19 +80,23 @@ export default {
         this.transactions = response
       })
     },
-    printOnCredit: function (oncreditId) {
-      this.loading = true
-      ipcRenderer.send('/oncredit/print', { oncreditId: oncreditId, copy: 1 })
+    printOnCredit: function (oncreditId, index) {
+      this.ltLoading['lt' + index] = true
+      this.$forceUpdate()
+      ipcRenderer.send('/oncredit/print', {
+        oncreditId: oncreditId,
+        copy: 1
+      })
       new Promise(function (resolve) {
         ipcRenderer.on('printResult', (event, response) => {
           resolve(response)
         })
       }).then(response => {
-        this.loading = false
-        if (!response.status) {
-          this.$bvToast.toast('Yazdırma başarısız oldu. ', {
+        this.ltLoading['lt' + index] = false
+        if (response.status !== true) {
+          this.$bvToast.toast('Yazdırma başarısız oldu, yazıcı bulunamadı. ', {
             title: 'Hata',
-            toaster: 'b-toaster-bottom-center',
+            toaster: 'b-toaster-top-center',
             variant: 'danger',
             solid: true,
             toastClass: 'mt-6',
@@ -96,10 +104,10 @@ export default {
             appendToast: true
           })
         } else {
-          this.success = true
+          this.ltSuccess['lt' + index] = true
           this.$bvToast.toast('Yazdırıldı. ', {
             title: 'Bilgi',
-            toaster: 'b-toaster-bottom-center',
+            toaster: 'b-toaster-top-center',
             variant: 'success',
             solid: true,
             toastClass: 'mt-6',
@@ -107,6 +115,7 @@ export default {
             appendToast: true
           })
         }
+        this.$forceUpdate()
       })
     }
   }

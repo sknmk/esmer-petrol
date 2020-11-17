@@ -13,35 +13,34 @@ import 'vue-multiselect/dist/vue-multiselect.min.css'
 import 'typeface-inter'
 import FrameControls from './components/FrameControls.vue'
 
-
 Vue.use(VueRouter)
 Vue.use(Vuex)
 Vue.use(BootstrapVue)
 Vue.use(IconsPlugin)
 
 const store = new Vuex.Store({
-    modules: { session },
-    plugins: [ createPersistedState() ]
+  modules: { session },
+  plugins: [createPersistedState()]
 })
 
-const components = { FrameControls };
+const components = { FrameControls }
 new Vue({
-    el: '#app',
-    components,
-    router,
-    store,
-    computed: {
-        ...mapGetters(['getSession'])
-    },
-    mounted() {
-        window.setInterval(function () {
-            let sessionLockTimeout = window.setTimeout(this.destroySession, 300000)
-            window.addEventListener('click keypress mousemove', function() {
-                window.clearTimeout(sessionLockTimeout)
-            }, true)
-        }, 300001)
-    },
-    methods: {
-        ...mapActions(['destroySession']),
-    }
-});
+  el: '#app',
+  components,
+  router,
+  store,
+  computed: {
+    ...mapGetters(['getSession'])
+  },
+  mounted () {
+    window.setInterval(function () {
+      const sessionLockTimeout = window.setTimeout(this.destroySession, 300000)
+      window.addEventListener('click keypress mousemove', function () {
+        window.clearTimeout(sessionLockTimeout)
+      }, true)
+    }, 300001)
+  },
+  methods: {
+    ...mapActions(['destroySession'])
+  }
+})

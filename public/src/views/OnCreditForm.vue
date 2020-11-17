@@ -36,6 +36,7 @@
                   :options="options.plates"
                   @input="checkCustomer"
                   @search-change="findPlate"
+                  ref="plateInput"
                   @tag="createPlate">
                 <span slot="noOptions">Yazmaya devam edin.</span>
                 <span slot="noResult">Sonuç bulunamadı.</span>
@@ -242,7 +243,7 @@ export default {
     }
   },
   mounted () {
-    this.getProducts()
+    this.$refs.plateInput.$el.focus()
   },
   methods: {
     findCustomer (name) {
@@ -476,8 +477,8 @@ export default {
         })
       }).then(response => {
         this.loading = false
-        if (!response.status) {
-          this.$bvToast.toast(i + '. yazdırma başarısız oldu. ', {
+        if (response.status !== true) {
+          this.$bvToast.toast('Yazdırma başarısız oldu, yazıcı bulunamadı.', {
             title: 'Hata',
             toaster: 'b-toaster-top-center',
             variant: 'danger',
