@@ -9,7 +9,7 @@ module.exports = {
     path: path.resolve(__dirname, 'public/dist'),
     filename: 'main.js'
   },
-  watch: true,
+  watch: false,
   module: {
     rules: [
       {

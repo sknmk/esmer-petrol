@@ -21,7 +21,7 @@
               <b-button variant="outline-secondary" size="sm" :disabled="ltLoading['lt' +index]"
                         @click="printOnCredit(transaction.oncreditId, index)">
                 <span v-if="ltLoading['lt' + index]"><b-spinner></b-spinner> Bekleyiniz..</span>
-                <span v-if="!ltLoading['lt' +index]"><b-icon-printer></b-icon-printer> Yazdır</span>
+                <span v-if="!ltLoading['lt' +index] && !ltSuccess['lt' +index]"><b-icon-printer></b-icon-printer> Yazdır</span>
                 <span v-if="ltSuccess['lt' +index] && !ltLoading['lt' +index]"><b-icon-check2-circle></b-icon-check2-circle> Yazdırıldı</span>
               </b-button>
             </b-col>
