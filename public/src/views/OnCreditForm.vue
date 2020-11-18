@@ -76,7 +76,7 @@
                 </b-thead>
                 <b-tbody>
                   <b-tr v-for="(product, i) of pricedProducts" :key="i">
-                    <b-td class="align-middle">{{ product.name }}</b-td>
+                    <b-td class="align-middle text-capitalize">{{ product.name }}</b-td>
                     <b-td class="align-middle">₺{{ product.forwardSalePrice }}</b-td>
                     <b-td>
                       <b-input-group>
@@ -147,6 +147,7 @@
           <b-form-row class="mt-2">
             <b-col class="align-self-center">
               <b-form-checkbox
+                  disabled
                   v-model="sms"
                   id="sms"
                   name="sms"
@@ -264,7 +265,7 @@ export default {
         for (const customer of response) {
           this.options.customers.push({
             id: customer.id,
-            name: customer.name,
+            name: customer.name.toUpperCase(),
             discount: customer.forwardPriceDiscount
           })
         }
@@ -291,6 +292,8 @@ export default {
             name: plate.plate,
             customerId: plate.customerId,
             customerName: plate.customerName,
+            customerDriverId: plate.customerDriverId,
+            customerDriverName: plate.customerDriverName,
             customerDiscount: plate.customerDiscount
           })
         }
@@ -374,8 +377,14 @@ export default {
       if (_.isEmpty(this.customer)) {
         this.customer = {
           id: this.plate.customerId,
-          name: this.plate.customerName,
+          name: this.plate.customerName.toUpperCase(),
           discount: this.plate.customerDiscount
+        }
+      }
+      if (this.plate && this.plate.customerDriverName.length > 0) {
+        this.driver = {
+          id: this.plate.customerDriverId,
+          name: this.plate.customerDriverName
         }
       }
     },

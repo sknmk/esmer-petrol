@@ -2,15 +2,14 @@
   <b-container fluid>
     <b-row v-if="!_.isEmpty(salesofficers) && !loading"
            class="pt-5 d-flex justify-content-center text-center">
-      <b-col lg="12" class="mb-3 mt-5">
-        <h1><i class="ri-gas-station-line"></i></h1>
-        <h5>Kimliğinizi seçiniz.</h5>
+      <b-col lg="12" class="my-5">
+        <b-img :src="require('../img/logo-blx.png')" class="img-fluid"/>
       </b-col>
       <b-col lg="3" v-for="(officer, i) of salesofficers" :key="i" @click="select(i)">
         <b-card class="identity-card">
           <b-card-img :src="officer.img" class="rounded-lg"></b-card-img>
           <b-card-text>
-            <h5 class="mt-3">{{ officer.name }}</h5>
+            <h5 class="mt-3 text-capitalize">{{ officer.name }}</h5>
           </b-card-text>
         </b-card>
       </b-col>
@@ -21,9 +20,8 @@
       </b-col>
     </b-row>
     <b-row class="pt-5 d-flex justify-content-center text-center" v-if="loading">
-      <b-col lg="12" class="mb-3 mt-5">
-        <h1><i class="ri-gas-station-line"></i></h1>
-        <h5>Kimliğinizi seçiniz.</h5>
+      <b-col lg="12" class="my-5">
+        <b-img :src="require('../img/logo-blx.png')" class="img-fluid"/>
       </b-col>
       <b-col lg="3">
         <b-card no-body img-top>
