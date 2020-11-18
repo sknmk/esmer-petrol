@@ -4,7 +4,7 @@
       <b-col cols="12">
         <h5 class="text-transparent mb-3">Son İşlemler</h5>
       </b-col>
-      <b-col cols="12" class="mb-4" v-for="transaction of transactions" :key="transaction.id">
+      <b-col cols="12" class="mb-4" v-for="(transaction, index) of transactions" :key="transaction.id">
         <b-card class="text-capitalize">
           <h6>
             <b-icon-building></b-icon-building>
