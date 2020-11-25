@@ -3,7 +3,7 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 module.exports = {
-  mode: 'production',
+  mode: 'development',
   entry: './public/src/index.js',
   output: {
     path: path.resolve(__dirname, 'public/dist'),

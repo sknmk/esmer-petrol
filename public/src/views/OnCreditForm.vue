@@ -77,7 +77,7 @@
                 <b-tbody>
                   <b-tr v-for="(product, i) of pricedProducts" :key="i">
                     <b-td class="align-middle text-capitalize">{{ product.name }}</b-td>
-                    <b-td class="align-middle">₺{{ product.forwardSalePrice }}</b-td>
+                    <b-td class="align-middle">₺{{ product.salePrice }}</b-td>
                     <b-td>
                       <b-input-group>
                         <b-input type="number"
@@ -215,7 +215,7 @@ export default {
     },
     pricedProducts: function () {
       return this.options.products.filter(function (i) {
-        return i.forwardSalePrice
+        return i.salePrice
       })
     },
     soldProducts: function () {
@@ -266,7 +266,7 @@ export default {
           this.options.customers.push({
             id: customer.id,
             name: customer.name.toUpperCase(),
-            discount: customer.forwardPriceDiscount
+            discount: customer.forwardSalesDiscountRate
           })
         }
       })
@@ -392,8 +392,10 @@ export default {
       this.options.products = []
       const form = {
         branchId: this.getSession.branchDetails.id,
-        discount: !_.isEmpty(this.customer) ? this.customer.discount : 0
+        discount: this.customer ? this.customer.discount : 0,
+        customerId: this.customer.id
       }
+      console.log(form)
       ipcRenderer.send('/product/list', form)
       new Promise(function (resolve) {
         ipcRenderer.on('productList', (event, response) => {
@@ -404,7 +406,7 @@ export default {
           this.options.products.push({
             id: product.id,
             name: product.name,
-            forwardSalePrice: product.forwardSalePrice.toFixed(2),
+            salePrice: product.specialSalePrice > 0 ? product.specialSalePrice.toFixed(2) : product.salePrice.toFixed(2),
             price: null,
             liter: null
           })
@@ -416,10 +418,10 @@ export default {
       })
     },
     fillPrice (i) {
-      this.options.products[i].price = (parseFloat(this.options.products[i].liter) * parseFloat(this.options.products[i].forwardSalePrice)).toFixed(2)
+      this.options.products[i].price = (parseFloat(this.options.products[i].liter) * parseFloat(this.options.products[i].salePrice)).toFixed(2)
     },
     fillLiter (i) {
-      this.options.products[i].liter = (parseFloat(this.options.products[i].price) / parseFloat(this.options.products[i].forwardSalePrice)).toFixed(2)
+      this.options.products[i].liter = (parseFloat(this.options.products[i].price) / parseFloat(this.options.products[i].salePrice)).toFixed(2)
     },
     insertDriver () {
       if (this.driver && this.driver.id === 'new') {
