@@ -5,7 +5,7 @@
       <b-col lg="12" class="my-5">
         <b-img :src="require('../img/logo-blx.png')" class="img-fluid"/>
       </b-col>
-      <b-col lg="3" v-for="(officer, i) of salesofficers" :key="i" @click="select(i)">
+      <b-col lg="2" v-for="(officer, i) of salesofficers" :key="i" @click="select(i)">
         <b-card class="identity-card">
           <b-card-img :src="officer.img" class="rounded-lg"></b-card-img>
           <b-card-text>
@@ -23,25 +23,49 @@
       <b-col lg="12" class="my-5">
         <b-img :src="require('../img/logo-blx.png')" class="img-fluid"/>
       </b-col>
-      <b-col lg="3">
+      <b-col lg="2">
         <b-card no-body img-top>
-          <b-skeleton-img card-img="top" aspect="4:3"></b-skeleton-img>
+          <b-skeleton-img card-img="top" aspect="4:4"></b-skeleton-img>
           <b-card-body>
             <b-skeleton animation="wave" width="55%"></b-skeleton>
           </b-card-body>
         </b-card>
       </b-col>
-      <b-col lg="3">
+      <b-col lg="2">
         <b-card no-body img-top>
-          <b-skeleton-img card-img="top" aspect="4:3"></b-skeleton-img>
+          <b-skeleton-img card-img="top" aspect="4:4"></b-skeleton-img>
           <b-card-body>
             <b-skeleton animation="wave" width="55%"></b-skeleton>
           </b-card-body>
         </b-card>
       </b-col>
-      <b-col lg="3">
+      <b-col lg="2">
         <b-card no-body img-top>
-          <b-skeleton-img card-img="top" aspect="4:3"></b-skeleton-img>
+          <b-skeleton-img card-img="top" aspect="4:4"></b-skeleton-img>
+          <b-card-body>
+            <b-skeleton animation="wave" width="55%"></b-skeleton>
+          </b-card-body>
+        </b-card>
+      </b-col>
+      <b-col lg="2">
+        <b-card no-body img-top>
+          <b-skeleton-img card-img="top" aspect="4:4"></b-skeleton-img>
+          <b-card-body>
+            <b-skeleton animation="wave" width="55%"></b-skeleton>
+          </b-card-body>
+        </b-card>
+      </b-col>
+      <b-col lg="2">
+        <b-card no-body img-top>
+          <b-skeleton-img card-img="top" aspect="4:4"></b-skeleton-img>
+          <b-card-body>
+            <b-skeleton animation="wave" width="55%"></b-skeleton>
+          </b-card-body>
+        </b-card>
+      </b-col>
+      <b-col lg="2">
+        <b-card no-body img-top>
+          <b-skeleton-img card-img="top" aspect="4:4"></b-skeleton-img>
           <b-card-body>
             <b-skeleton animation="wave" width="55%"></b-skeleton>
           </b-card-body>

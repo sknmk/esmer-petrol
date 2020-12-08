@@ -240,7 +240,21 @@ export default {
   },
   watch: {
     customer: function () {
-      this.getProducts()
+      if (this.customer.oncreditDisabled) {
+        this.$bvToast.toast('Bu müşteri veresiye satışına kapalıdır.', {
+          title: 'Uyarı',
+          toaster: 'b-toaster-top-center',
+          variant: 'danger',
+          solid: true,
+          toastClass: 'mt-6',
+          noCloseButton: false,
+          appendToast: true
+        })
+        this.options.customers = []
+        return false
+      } else {
+        this.getProducts()
+      }
     }
   },
   mounted () {
@@ -266,7 +280,8 @@ export default {
           this.options.customers.push({
             id: customer.id,
             name: customer.name.toUpperCase(),
-            discount: customer.forwardSalesDiscountRate
+            discount: customer.forwardSalesDiscountRate,
+            oncreditDisabled: customer.oncreditDisabled
           })
         }
       })
@@ -294,6 +309,7 @@ export default {
             customerName: plate.customerName,
             customerDriverId: plate.customerDriverId,
             customerDriverName: plate.customerDriverName,
+            customerOncreditDisabled: plate.customerOncreditDisabled,
             customerDiscount: plate.customerDiscount
           })
         }
@@ -318,7 +334,7 @@ export default {
           variant: 'danger',
           solid: true,
           toastClass: 'mt-6',
-          noCloseButton: true,
+          noCloseButton: false,
           appendToast: true
         })
         return false
@@ -367,13 +383,25 @@ export default {
           variant: 'danger',
           solid: true,
           toastClass: 'mt-6',
-          noCloseButton: true,
+          noCloseButton: false,
           appendToast: true
         })
         return false
       }
     },
     checkCustomer () {
+      if (this.plate.customerOncreditDisabled) {
+        this.$bvToast.toast(this.plate.customerName + ' veresiye satışına kapalıdır. İşlem yapamazsınız!', {
+          title: 'Uyarı',
+          toaster: 'b-toaster-top-center',
+          variant: 'danger',
+          solid: true,
+          toastClass: 'mt-6',
+          noCloseButton: false,
+          appendToast: true
+        })
+        return false
+      }
       if (_.isEmpty(this.customer)) {
         this.customer = {
           id: this.plate.customerId,
@@ -481,7 +509,10 @@ export default {
     },
     printOnCredit: function (oncreditId) {
       this.loading = true
-      ipcRenderer.send('/oncredit/print', { oncreditId: oncreditId, copy: false })
+      ipcRenderer.send('/oncredit/print', {
+        oncreditId: oncreditId,
+        copy: false
+      })
       new Promise(function (resolve) {
         ipcRenderer.on('printResult', (event, response) => {
           resolve(response)
@@ -495,7 +526,7 @@ export default {
             variant: 'danger',
             solid: true,
             toastClass: 'mt-6',
-            noCloseButton: true,
+            noCloseButton: false,
             appendToast: true
           })
         } else {
@@ -506,7 +537,7 @@ export default {
             variant: 'success',
             solid: true,
             toastClass: 'mt-6',
-            noCloseButton: true,
+            noCloseButton: false,
             appendToast: true
           })
         }
