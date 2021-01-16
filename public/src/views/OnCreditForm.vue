@@ -163,7 +163,6 @@
                   value="1"
                   unchecked-value="0">
                 Bilgilendirme SMS'i gönderilsin.
-                <b-icon-chat-left-text></b-icon-chat-left-text>
               </b-form-checkbox>
             </b-col>
             <b-col class="mt-2 text-right">
@@ -171,7 +170,8 @@
                 <b-icon-x></b-icon-x>
                 İptal
               </b-button>
-              <b-button :variant="!_.isEmpty(errors) ? 'outline-danger' : (!success ? 'outline-primary' : 'success')" @click="save"
+              <b-button :variant="!_.isEmpty(errors) ? 'outline-danger' : (!success ? 'outline-primary' : 'success')"
+                        @click="save"
                         :disabled="!customer.id || !plate.id || _.isEmpty(soldProducts) || !driver.id || loading || success">
                 <span v-if="loading"><b-spinner></b-spinner> Bekleyiniz..</span>
                 <span v-if="!loading && _.isEmpty(errors) && !success"><b-icon-printer></b-icon-printer> Yazdır</span>
@@ -183,10 +183,13 @@
         </b-card>
       </b-col>
       <b-col cols="3">
-        <div class="accordion col-12" role="tablist" v-if="customer.id">
-          <b-card no-body class="mb-1">
+        <div class="accordion col-12 mb-3 mt-4" role="tablist" v-if="customer.id">
+          <b-card no-body class="mb-1 mt-1">
             <b-card-header header-tag="header" class="p-1" role="tab">
-              <b-button block v-b-toggle.payment-accordion-1 variant="info"><b-icon-plus></b-icon-plus> Yeni Tahsilat Girişi</b-button>
+              <b-button block v-b-toggle.payment-accordion-1 variant="outline-dark">
+                <b-icon-plus></b-icon-plus>
+                Yeni Tahsilat Girişi
+              </b-button>
             </b-card-header>
             <b-collapse id="payment-accordion-1" accordion="my-accordion" role="tabpanel">
               <b-card-body>
@@ -205,13 +208,22 @@
                   <b-col>
                     <label>Açıklama</label>
                     <b-input-group>
-                      <b-input type="text" v-model="payment.description"></b-input>
+                      <b-input type="text" ref="paymentDescription" v-model="payment.description"></b-input>
                       <b-input-group-text>
                         <b-icon-text-center></b-icon-text-center>
                       </b-input-group-text>
                     </b-input-group>
                   </b-col>
                 </b-form-row>
+                <div class="mt-2">
+                  <b-form-radio-group>
+                    <div v-for="item in paymentTypes" :key="item.id">
+                      <b-form-radio name="paymentType" size="lg" :value="item.id" v-model="payment.paymentType"
+                                    :checked="item.id == 1" checked-value="1">{{ item.name }}
+                      </b-form-radio>
+                    </div>
+                  </b-form-radio-group>
+                </div>
                 <b-form-row class="mt-2">
                   <div class="align-self-center float-left">
                     <b-form-checkbox
@@ -222,7 +234,6 @@
                         value="1"
                         unchecked-value="0">
                       SMS
-                      <b-icon-chat-left-text></b-icon-chat-left-text>
                     </b-form-checkbox>
                   </div>
                   <b-col class="mt-2 text-right">
@@ -230,10 +241,14 @@
                       <b-icon-x></b-icon-x>
                       İptal
                     </b-button>
-                    <b-button variant="success" @click="savePayment"
-                              :disabled="payment.amount<=0">
-                      <span><b-icon-check2></b-icon-check2> Kaydet</span>
-                    </b-button>
+                      <b-button :variant="!_.isEmpty(paymentErrors) ? 'outline-danger' : (!paymentSuccess ? 'outline-primary' : 'success')"
+                                @click="savePayment"
+                                :disabled="!payment.amount || paymentLoading || paymentSuccess">
+                        <span v-if="paymentLoading"><b-spinner></b-spinner> Bekleyiniz..</span>
+                        <span v-if="!paymentLoading && _.isEmpty(paymentErrors) && !paymentSuccess"><b-icon-check></b-icon-check> Kaydet</span>
+                        <span v-if="!_.isEmpty(paymentErrors)"><b-icon-arrow-counterclockwise></b-icon-arrow-counterclockwise> Tekrar Dene</span>
+                        <span v-if="paymentSuccess"><b-icon-check2-circle></b-icon-check2-circle> Kaydedildi</span>
+                      </b-button>
                   </b-col>
                 </b-form-row>
               </b-card-body>
@@ -261,13 +276,14 @@ export default {
     Multiselect,
     LastTransactions
   },
-  data () {
+  data() {
     return {
       customer: [],
       payment: [],
       plate: [],
       driver: [],
       description: null,
+      paymentTypes: [],
       sms: 0,
       options: {
         customers: [],
@@ -279,7 +295,7 @@ export default {
   },
   computed: {
     ...mapGetters(['getSession']),
-    _ () {
+    _() {
       return _
     },
     pricedProducts: function () {
@@ -326,18 +342,27 @@ export default {
       }
     }
   },
-  mounted () {
+  mounted() {
     this.$refs.plateInput.$el.focus()
     this.$root.$on('bv::collapse::state', (collapseId, isJustShown) => {
-      if(collapseId == 'payment-accordion-1' && isJustShown == true){
-        setTimeout(()=>{
+      if (collapseId == 'payment-accordion-1' && isJustShown == true) {
+        setTimeout(() => {
           this.$refs.paymentAmount.$el.focus()
-        },500)
+        }, 500)
       }
+    })
+
+    ipcRenderer.send('/oncredit/paymentTypeList')
+    new Promise(function (resolve) {
+      ipcRenderer.on('paymentTypeList', (event, response) => {
+        resolve(response)
+      })
+    }).then(response => {
+      this.paymentTypes = response
     })
   },
   methods: {
-    findCustomer (name) {
+    findCustomer(name) {
       if (name.length < 3) {
         return false
       }
@@ -362,7 +387,7 @@ export default {
         }
       })
     },
-    findPlate (plate) {
+    findPlate(plate) {
       if (plate.length < 3) {
         return false
       }
@@ -392,7 +417,7 @@ export default {
         }
       })
     },
-    createPlate (plate) {
+    createPlate(plate) {
       if (this.plateValidation(plate) === false) {
         return false
       }
@@ -403,7 +428,7 @@ export default {
       this.plate = tag
       this.options.plates.push(tag)
     },
-    plateValidation (plate) {
+    plateValidation(plate) {
       if (plate.length < 7 || plate.length > 32) {
         this.$bvToast.toast('Geçersiz bir plaka girdiniz.', {
           title: 'Uyarı',
@@ -417,7 +442,7 @@ export default {
         return false
       }
     },
-    findDriver (name) {
+    findDriver(name) {
       if (name.length < 3) {
         return false
       }
@@ -441,7 +466,7 @@ export default {
         }
       })
     },
-    createDriver (name) {
+    createDriver(name) {
       if (this.driverValidation(name) === false) {
         return false
       }
@@ -452,7 +477,7 @@ export default {
       this.driver = tag
       this.options.drivers.push(tag)
     },
-    driverValidation (name) {
+    driverValidation(name) {
       const namePieces = name.split(' ')
       if (namePieces[0].length < 3 || name.length < 7 || name.length > 50) {
         this.$bvToast.toast('Geçersiz bir şoför ismi girdiniz.', {
@@ -467,7 +492,7 @@ export default {
         return false
       }
     },
-    checkCustomer () {
+    checkCustomer() {
       if (this.plate.customerOncreditDisabled) {
         this.$bvToast.toast(this.plate.customerName + ' veresiye satışına kapalıdır. İşlem yapamazsınız!', {
           title: 'Uyarı',
@@ -495,7 +520,7 @@ export default {
         }
       }
     },
-    getProducts () {
+    getProducts() {
       this.options.products = []
       const form = {
         branchId: this.getSession.branchDetails.id,
@@ -523,13 +548,13 @@ export default {
         })
       })
     },
-    fillPrice (i) {
+    fillPrice(i) {
       this.options.products[i].price = (parseFloat(this.options.products[i].liter) * parseFloat(this.options.products[i].salePrice)).toFixed(2)
     },
-    fillLiter (i) {
+    fillLiter(i) {
       this.options.products[i].liter = (parseFloat(this.options.products[i].price) / parseFloat(this.options.products[i].salePrice)).toFixed(2)
     },
-    insertDriver () {
+    insertDriver() {
       if (this.driver && this.driver.id === 'new') {
         const form = {
           customerId: this.customer.id,
@@ -539,7 +564,7 @@ export default {
         return ipcRenderer.sendSync('/driver/create', form)
       }
     },
-    insertPlate () {
+    insertPlate() {
       if (this.plate && this.plate.id === 'new') {
         const form = {
           customerId: this.customer.id,
@@ -549,9 +574,116 @@ export default {
       }
     },
     savePayment() {
+      // check before send
+      if (isNaN(this.customer.id)){
+        this.$bvToast.toast('Öncelikle Müşteri Seçmelisiniz!', {
+          title: 'Uyarı',
+          toaster: 'b-toaster-top-right',
+          variant: 'danger',
+          solid: true,
+          toastClass: 'mt-6',
+          noCloseButton: false,
+          appendToast: true
+        })
+        return false
+      }
+      if (isNaN(this.payment.amount) || this.payment.amount <= 0 || this.payment.amount > 9999999) {
+        this.$bvToast.toast('Tahsilat tutarını kontrol ediniz!', {
+          title: 'Uyarı',
+          toaster: 'b-toaster-top-right',
+          variant: 'danger',
+          solid: true,
+          toastClass: 'mt-6',
+          noCloseButton: false,
+          appendToast: true
+        })
+        return false
+      }
+      if (isNaN(this.payment.paymentType)) {
+        this.$bvToast.toast('Tahsilat Türünü Seçmelisiniz!', {
+          title: 'Uyarı',
+          toaster: 'b-toaster-top-right',
+          variant: 'danger',
+          solid: true,
+          toastClass: 'mt-6',
+          noCloseButton: false,
+          appendToast: true
+        })
+        return false
+      }
+      if (this.payment.paymentType == 4 && this.payment.description == null){
+        this.$bvToast.toast('Çek için açıklama bölümüne vade bilgisi giriniz!', {
+          title: 'Uyarı',
+          toaster: 'b-toaster-top-right',
+          variant: 'danger',
+          solid: true,
+          toastClass: 'mt-6',
+          noCloseButton: false,
+          appendToast: true
+        })
+        this.$refs.paymentDescription.$el.focus()
+        return false
+      }
+      if (this.payment.paymentType == 5 && this.payment.description == null){
+        this.$bvToast.toast('Senet için açıklama bölümüne vade bilgisi giriniz!', {
+          title: 'Uyarı',
+          toaster: 'b-toaster-top-right',
+          variant: 'danger',
+          solid: true,
+          toastClass: 'mt-6',
+          noCloseButton: false,
+          appendToast: true
+        })
+        this.$refs.paymentDescription.$el.focus()
+        return false
+      }
+      // send value
+      const driverId = this.driver.id === 'new' ? this.insertDriver() : this.driver.id
+      const plateId = this.plate.id === 'new' ? this.insertPlate() : this.plate.id
+
+      this.paymentloading = true
+      this.paymentErrors = []
+      ipcRenderer.send('/oncredit/createPayment', {
+        companyId: this.companyId,
+        branchId: this.branchId,
+        salesofficerId: this.salesofficerId,
+        customer: this.customer,
+        amount: this.payment.amount,
+        paymentType: this.payment.paymentType,
+        description: this.payment.description,
+        sms: this.sms,
+        plateId: plateId || 0,
+        driverId : driverId || 0,
+        driverTaxNumber: this.driver.taxNumber
+      })
+      new Promise(function (resolve) {
+        ipcRenderer.on('paymentCreate', (event, response) => {
+          resolve(response)
+        })
+      }).then(response => {
+        this.paymentLoading = false
+        if (!_.isEmpty(response.errors)) {
+          this.paymentErrors = response.errors
+          for (let error in this.paymentErrors) {
+            this.$bvToast.toast(this.paymentErrors[error], {
+              title: 'Hata',
+              toaster: 'b-toaster-top-center',
+              variant: 'danger',
+              solid: true,
+              toastClass: 'mt-6',
+              noCloseButton: false,
+              appendToast: true
+            })
+          }
+          return false
+        } else {
+          this.payment = []
+          this.printPayment(response.moneyFlowId, 1)
+        }
+      })
 
     },
-    save () {
+    save() {
       this.loading = true
       this.errors = []
       const driverId = this.driver.id === 'new' ? this.insertDriver() : this.driver.id
@@ -578,15 +710,15 @@ export default {
         if (!_.isEmpty(response.errors)) {
           this.errors = response.errors
           for (let error in this.errors) {
-              this.$bvToast.toast(this.errors[error], {
-                title: 'Hata',
-                toaster: 'b-toaster-top-center',
-                variant: 'danger',
-                solid: true,
-                toastClass: 'mt-6',
-                noCloseButton: false,
-                appendToast: true
-              })
+            this.$bvToast.toast(this.errors[error], {
+              title: 'Hata',
+              toaster: 'b-toaster-top-center',
+              variant: 'danger',
+              solid: true,
+              toastClass: 'mt-6',
+              noCloseButton: false,
+              appendToast: true
+            })
           }
           return false
         } else {
@@ -613,6 +745,43 @@ export default {
         })
       }).then(response => {
         this.loading = false
+        if (response.status !== true) {
+          this.$bvToast.toast('Yazdırma başarısız oldu, yazıcı bulunamadı.', {
+            title: 'Hata',
+            toaster: 'b-toaster-top-center',
+            variant: 'danger',
+            solid: true,
+            toastClass: 'mt-6',
+            noCloseButton: false,
+            appendToast: true
+          })
+        } else {
+          this.success = true
+          this.$bvToast.toast('Yazdırıldı. ', {
+            title: 'Bilgi',
+            toaster: 'b-toaster-top-center',
+            variant: 'success',
+            solid: true,
+            toastClass: 'mt-6',
+            noCloseButton: false,
+            appendToast: true
+          })
+        }
+      })
+    },
+      printPayment: function (moneyFlowId) {
+      this.paymentLoading = true
+      ipcRenderer.send('/oncredit/printPayment', {
+        moneyFlowId,
+        copy: false
+      })
+      new Promise(function (resolve) {
+        ipcRenderer.on('printPaymentResult', (event, response) => {
+          resolve(response)
+        })
+      }).then(response => {
+        this.paymentLoading = false
+        this.paymentSuccess = false
         if (response.status !== true) {
           this.$bvToast.toast('Yazdırma başarısız oldu, yazıcı bulunamadı.', {
             title: 'Hata',
