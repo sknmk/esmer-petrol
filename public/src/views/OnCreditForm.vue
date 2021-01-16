@@ -171,11 +171,11 @@
                 <b-icon-x></b-icon-x>
                 İptal
               </b-button>
-              <b-button :variant="!success ? 'outline-primary' : 'success'" @click="save"
+              <b-button :variant="!_.isEmpty(errors) ? 'outline-danger' : (!success ? 'outline-primary' : 'success')" @click="save"
                         :disabled="!customer.id || !plate.id || _.isEmpty(soldProducts) || !driver.id || loading || success">
                 <span v-if="loading"><b-spinner></b-spinner> Bekleyiniz..</span>
                 <span v-if="!loading && _.isEmpty(errors) && !success"><b-icon-printer></b-icon-printer> Yazdır</span>
-                <span v-if="!_.isEmpty(errors)">Hata</span>
+                <span v-if="!_.isEmpty(errors)"><b-icon-arrow-counterclockwise></b-icon-arrow-counterclockwise> Tekrar Dene</span>
                 <span v-if="success"><b-icon-check2-circle></b-icon-check2-circle> Yazdırıldı</span>
               </b-button>
             </b-col>
@@ -559,6 +559,7 @@ export default {
         sms: this.sms,
         plateId,
         driverId,
+        driverTaxNumber: this.driver.taxNumber,
         totalPrice: this.totalPrice
       })
       new Promise(function (resolve) {
@@ -569,6 +570,17 @@ export default {
         this.loading = false
         if (!_.isEmpty(response.errors)) {
           this.errors = response.errors
+          for (let error in this.errors) {
+              this.$bvToast.toast(this.errors[error], {
+                title: 'Hata',
+                toaster: 'b-toaster-top-center',
+                variant: 'danger',
+                solid: true,
+                toastClass: 'mt-6',
+                noCloseButton: false,
+                appendToast: true
+              })
+          }
           return false
         } else {
           if (isNaN(response.oncreditId)) {
