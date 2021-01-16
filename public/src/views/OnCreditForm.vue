@@ -183,12 +183,12 @@
         </b-card>
       </b-col>
       <b-col cols="3">
-        <div class="accordion col-12" role="tablist" v-if="customer.id && driver.id">
+        <div class="accordion col-12" role="tablist" v-if="customer.id">
           <b-card no-body class="mb-1">
             <b-card-header header-tag="header" class="p-1" role="tab">
-              <b-button block v-b-toggle.accordion-1 variant="info"><b-icon-plus></b-icon-plus> Yeni Tahsilat Girişi</b-button>
+              <b-button block v-b-toggle.payment-accordion-1 variant="info"><b-icon-plus></b-icon-plus> Yeni Tahsilat Girişi</b-button>
             </b-card-header>
-            <b-collapse id="accordion-1" accordion="my-accordion" role="tabpanel">
+            <b-collapse id="payment-accordion-1" accordion="my-accordion" role="tabpanel">
               <b-card-body>
                 <b-form-row>
                   <b-col>
@@ -226,7 +226,7 @@
                     </b-form-checkbox>
                   </div>
                   <b-col class="mt-2 text-right">
-                    <b-button variant="light" class="text-danger" v-b-toggle.accordion-1>
+                    <b-button variant="light" class="text-danger" v-b-toggle.payment-accordion-1>
                       <b-icon-x></b-icon-x>
                       İptal
                     </b-button>
@@ -328,6 +328,13 @@ export default {
   },
   mounted () {
     this.$refs.plateInput.$el.focus()
+    this.$root.$on('bv::collapse::state', (collapseId, isJustShown) => {
+      if(collapseId == 'payment-accordion-1' && isJustShown == true){
+        setTimeout(()=>{
+          this.$refs.paymentAmount.$el.focus()
+        },500)
+      }
+    })
   },
   methods: {
     findCustomer (name) {
