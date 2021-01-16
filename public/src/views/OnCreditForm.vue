@@ -62,6 +62,15 @@
                 <span slot="noResult">Sonuç bulunamadı.</span>
               </multiselect>
             </b-col>
+            <b-col cols="6" v-if="driver.id">
+              <label>Şoför T.C. No</label>
+              <b-input-group>
+                <b-input type="number" v-model="driver.taxNumber"></b-input>
+                <b-input-group-text>
+                  <b-icon-sort-numeric-down></b-icon-sort-numeric-down>
+                </b-input-group-text>
+              </b-input-group>
+            </b-col>
           </b-form-row>
           <b-form-row v-if="!_.isEmpty(options.products) && driver.id && plate.id && customer.id">
             <b-col cols="12 mt-3">
@@ -174,7 +183,66 @@
         </b-card>
       </b-col>
       <b-col cols="3">
-        <last-transactions></last-transactions>
+        <div class="accordion col-12" role="tablist" v-if="customer.id && driver.id">
+          <b-card no-body class="mb-1">
+            <b-card-header header-tag="header" class="p-1" role="tab">
+              <b-button block v-b-toggle.accordion-1 variant="info"><b-icon-plus></b-icon-plus> Yeni Tahsilat Girişi</b-button>
+            </b-card-header>
+            <b-collapse id="accordion-1" accordion="my-accordion" role="tabpanel">
+              <b-card-body>
+                <b-form-row>
+                  <b-col>
+                    <label>Tahsilat Tutarı*</label>
+                    <b-input-group>
+                      <b-input type="number" v-model="payment.amount" ref="paymentAmount"></b-input>
+                      <b-input-group-text>
+                        <b-icon-sort-numeric-down></b-icon-sort-numeric-down>
+                      </b-input-group-text>
+                    </b-input-group>
+                  </b-col>
+                </b-form-row>
+                <b-form-row>
+                  <b-col>
+                    <label>Açıklama</label>
+                    <b-input-group>
+                      <b-input type="text" v-model="payment.description"></b-input>
+                      <b-input-group-text>
+                        <b-icon-text-center></b-icon-text-center>
+                      </b-input-group-text>
+                    </b-input-group>
+                  </b-col>
+                </b-form-row>
+                <b-form-row class="mt-2">
+                  <div class="align-self-center float-left">
+                    <b-form-checkbox
+                        disabled
+                        v-model="sms"
+                        id="sms"
+                        name="sms"
+                        value="1"
+                        unchecked-value="0">
+                      SMS
+                      <b-icon-chat-left-text></b-icon-chat-left-text>
+                    </b-form-checkbox>
+                  </div>
+                  <b-col class="mt-2 text-right">
+                    <b-button variant="light" class="text-danger" v-b-toggle.accordion-1>
+                      <b-icon-x></b-icon-x>
+                      İptal
+                    </b-button>
+                    <b-button variant="success" @click="savePayment"
+                              :disabled="payment.amount<=0">
+                      <span><b-icon-check2></b-icon-check2> Kaydet</span>
+                    </b-button>
+                  </b-col>
+                </b-form-row>
+              </b-card-body>
+            </b-collapse>
+          </b-card>
+        </div>
+        <div>
+          <last-transactions></last-transactions>
+        </div>
       </b-col>
     </b-row>
   </b-container>
@@ -196,6 +264,7 @@ export default {
   data () {
     return {
       customer: [],
+      payment: [],
       plate: [],
       driver: [],
       description: null,
@@ -309,6 +378,7 @@ export default {
             customerName: plate.customerName,
             customerDriverId: plate.customerDriverId,
             customerDriverName: plate.customerDriverName,
+            customerDriverTaxNumber: plate.customerDriverTaxNumber,
             customerOncreditDisabled: plate.customerOncreditDisabled,
             customerDiscount: plate.customerDiscount
           })
@@ -358,7 +428,8 @@ export default {
         for (const driver of response) {
           this.options.drivers.push({
             id: driver.id,
-            name: driver.name
+            name: driver.name,
+            taxNumber: driver.taxNumber
           })
         }
       })
@@ -412,7 +483,8 @@ export default {
       if (this.plate && this.plate.customerDriverName.length > 0) {
         this.driver = {
           id: this.plate.customerDriverId,
-          name: this.plate.customerDriverName
+          name: this.plate.customerDriverName,
+          taxNumber: this.plate.customerDriverTaxNumber
         }
       }
     },
@@ -423,7 +495,6 @@ export default {
         discount: this.customer ? this.customer.discount : 0,
         customerId: this.customer.id
       }
-      console.log(form)
       ipcRenderer.send('/product/list', form)
       new Promise(function (resolve) {
         ipcRenderer.on('productList', (event, response) => {
@@ -455,7 +526,8 @@ export default {
       if (this.driver && this.driver.id === 'new') {
         const form = {
           customerId: this.customer.id,
-          driver: this.driver.name
+          driver: this.driver.name,
+          taxNumber: this.driver.taxNumber
         }
         return ipcRenderer.sendSync('/driver/create', form)
       }
@@ -468,6 +540,9 @@ export default {
         }
         return ipcRenderer.sendSync('/plate/create', form)
       }
+    },
+    savePayment() {
+
     },
     save () {
       this.loading = true
