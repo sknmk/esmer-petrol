@@ -4,7 +4,7 @@
       <b-col md="2" class="align-self-center py-1">
         <img src="../img/logo-blx.png" alt="logo" height="32"/>
       </b-col>
-      <b-col offset-md="5" md="5" class="text-right align-self-center">
+      <b-col offset-md="4" md="6" class="text-right align-self-center">
         <span class="pointer no-drag" v-b-popover.hover.left="'Güvenli Çıkış'" @click="logout">
           <b-icon-box-arrow-left></b-icon-box-arrow-left>
           Güvenli Çıkış

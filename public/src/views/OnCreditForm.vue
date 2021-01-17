@@ -16,6 +16,7 @@
                   track-by="id"
                   label="name"
                   :options="options.customers"
+                  @input="resetPlateDriver"
                   @search-change="findCustomer">
                 <span slot="noOptions">Yazmaya devam edin.</span>
                 <span slot="noResult">Sonuç bulunamadı.</span>
@@ -72,7 +73,7 @@
               </b-input-group>
             </b-col>
           </b-form-row>
-          <b-form-row v-if="!_.isEmpty(options.products) && driver.id && plate.id && customer.id">
+          <b-form-row style="overflow-y: auto; max-height: 50vh" v-if="!_.isEmpty(options.products) && driver.id && plate.id && customer.id">
             <b-col cols="12 mt-3">
               <b-table-simple responsive>
                 <b-thead>
@@ -186,7 +187,7 @@
         <div class="accordion col-12 mb-3 mt-4" role="tablist" v-if="customer.id">
           <b-card no-body class="mb-1 mt-1">
             <b-card-header header-tag="header" class="p-1" role="tab">
-              <b-button block v-b-toggle.payment-accordion-1 variant="outline-dark">
+              <b-button block v-b-toggle.payment-accordion-1 variant="outline-dark" style="margin-top: 11px !important;">
                 <b-icon-plus></b-icon-plus>
                 Yeni Tahsilat Girişi
               </b-button>
@@ -241,14 +242,15 @@
                       <b-icon-x></b-icon-x>
                       İptal
                     </b-button>
-                      <b-button :variant="!_.isEmpty(paymentErrors) ? 'outline-danger' : (!paymentSuccess ? 'outline-primary' : 'success')"
-                                @click="savePayment"
-                                :disabled="!payment.amount || paymentLoading || paymentSuccess">
-                        <span v-if="paymentLoading"><b-spinner></b-spinner> Bekleyiniz..</span>
-                        <span v-if="!paymentLoading && _.isEmpty(paymentErrors) && !paymentSuccess"><b-icon-check></b-icon-check> Kaydet</span>
-                        <span v-if="!_.isEmpty(paymentErrors)"><b-icon-arrow-counterclockwise></b-icon-arrow-counterclockwise> Tekrar Dene</span>
-                        <span v-if="paymentSuccess"><b-icon-check2-circle></b-icon-check2-circle> Kaydedildi</span>
-                      </b-button>
+                    <b-button
+                        :variant="!_.isEmpty(paymentErrors) ? 'outline-danger' : (!paymentSuccess ? 'outline-primary' : 'success')"
+                        @click="savePayment"
+                        :disabled="!payment.amount || paymentLoading || paymentSuccess">
+                      <span v-if="paymentLoading"><b-spinner></b-spinner> Bekleyiniz..</span>
+                      <span v-if="!paymentLoading && _.isEmpty(paymentErrors) && !paymentSuccess"><b-icon-check></b-icon-check> Kaydet</span>
+                      <span v-if="!_.isEmpty(paymentErrors)"><b-icon-arrow-counterclockwise></b-icon-arrow-counterclockwise> Tekrar Dene</span>
+                      <span v-if="paymentSuccess"><b-icon-check2-circle></b-icon-check2-circle> Kaydedildi</span>
+                    </b-button>
                   </b-col>
                 </b-form-row>
               </b-card-body>
@@ -417,6 +419,10 @@ export default {
         }
       })
     },
+    resetPlateDriver() {
+      this.plate = {}
+      this.driver = {}
+    },
     createPlate(plate) {
       if (this.plateValidation(plate) === false) {
         return false
@@ -505,12 +511,10 @@ export default {
         })
         return false
       }
-      if (_.isEmpty(this.customer)) {
-        this.customer = {
-          id: this.plate.customerId,
-          name: this.plate.customerName.toUpperCase(),
-          discount: this.plate.customerDiscount
-        }
+      this.customer = {
+        id: this.plate.customerId,
+        name: this.plate.customerName.toUpperCase(),
+        discount: this.plate.customerDiscount
       }
       if (this.plate && this.plate.customerDriverName.length > 0) {
         this.driver = {
@@ -575,7 +579,7 @@ export default {
     },
     savePayment() {
       // check before send
-      if (isNaN(this.customer.id)){
+      if (isNaN(this.customer.id)) {
         this.$bvToast.toast('Öncelikle Müşteri Seçmelisiniz!', {
           title: 'Uyarı',
           toaster: 'b-toaster-top-right',
@@ -611,7 +615,7 @@ export default {
         })
         return false
       }
-      if (this.payment.paymentType == 4 && this.payment.description == null){
+      if (this.payment.paymentType == 4 && this.payment.description == null) {
         this.$bvToast.toast('Çek için açıklama bölümüne vade bilgisi giriniz!', {
           title: 'Uyarı',
           toaster: 'b-toaster-top-right',
@@ -624,7 +628,7 @@ export default {
         this.$refs.paymentDescription.$el.focus()
         return false
       }
-      if (this.payment.paymentType == 5 && this.payment.description == null){
+      if (this.payment.paymentType == 5 && this.payment.description == null) {
         this.$bvToast.toast('Senet için açıklama bölümüne vade bilgisi giriniz!', {
           title: 'Uyarı',
           toaster: 'b-toaster-top-right',
@@ -653,7 +657,7 @@ export default {
         description: this.payment.description,
         sms: this.sms,
         plateId: plateId || 0,
-        driverId : driverId || 0,
+        driverId: driverId || 0,
         driverTaxNumber: this.driver.taxNumber
       })
       new Promise(function (resolve) {
@@ -677,7 +681,11 @@ export default {
           }
           return false
         } else {
+          this.paymentLoading = false
           this.payment = []
+          setTimeout(() => {
+            this.backtoUserSelector()
+          }, 2000)
           this.printPayment(response.moneyFlowId, 1)
         }
       })
@@ -723,7 +731,7 @@ export default {
           return false
         } else {
           if (isNaN(response.oncreditId)) {
-            alert('Kritik hata.')
+            alert('Kritik hata. oncreditId alınamadı')
             return false
           }
           this.printOnCredit(response.oncreditId, 3)
@@ -769,8 +777,7 @@ export default {
         }
       })
     },
-      printPayment: function (moneyFlowId) {
-      this.paymentLoading = true
+    printPayment: function (moneyFlowId) {
       ipcRenderer.send('/oncredit/printPayment', {
         moneyFlowId,
         copy: false
@@ -780,8 +787,6 @@ export default {
           resolve(response)
         })
       }).then(response => {
-        this.paymentLoading = false
-        this.paymentSuccess = false
         if (response.status !== true) {
           this.$bvToast.toast('Yazdırma başarısız oldu, yazıcı bulunamadı.', {
             title: 'Hata',

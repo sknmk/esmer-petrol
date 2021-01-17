@@ -1,6 +1,9 @@
 <template>
   <b-container fluid>
-    <b-row v-if="!_.isEmpty(transactions)" class="max-h-750">
+    <b-row v-if="!_.isEmpty(transactions)" style="
+    max-height: 80vh;
+    overflow: auto;
+">
       <b-col cols="12">
         <h5 class="text-transparent mb-3">Son İşlemler</h5>
       </b-col>
@@ -50,7 +53,7 @@ import { mapGetters } from 'vuex'
 import _ from 'lodash'
 
 export default {
-  data () {
+  data() {
     return {
       transactions: [],
       ltLoading: {},
@@ -59,18 +62,18 @@ export default {
   },
   computed: {
     ...mapGetters(['getSession']),
-    _ () {
+    _() {
       return _
     },
     branchId: function () {
       return this.getSession.branchDetails.id
     }
   },
-  mounted () {
+  mounted() {
     this.get()
   },
   methods: {
-    get () {
+    get() {
       ipcRenderer.send('/oncredit/list', { branchId: this.branchId })
       new Promise(function (resolve) {
         ipcRenderer.on('oncreditList', (event, response) => {
