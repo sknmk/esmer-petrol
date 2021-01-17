@@ -286,6 +286,9 @@ export default {
       driver: [],
       description: null,
       paymentTypes: [],
+      paymentErrors: [],
+      paymentSuccess: false,
+      paymentLoading: false,
       sms: 0,
       options: {
         customers: [],
